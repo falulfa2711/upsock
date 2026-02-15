@@ -3,113 +3,113 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Up סטוק | הכל לבית ולחג</title>
+    <title>Up סטוק | דף הבית</title>
     <style>
-        :root { --primary: #ed1c24; --dark: #1a1a1a; --light: #f4f4f4; --success: #25d366; }
-        body { font-family: system-ui, -apple-system, sans-serif; margin: 0; background: var(--light); direction: rtl; scroll-behavior: smooth; }
+        :root { --primary: #ed1c24; --dark: #1a1a1a; --light: #f8f9fa; }
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: var(--light); direction: rtl; }
+
+        /* סרגל עגלה קבוע */
+        .cart-sticky { position: sticky; top: 0; z-index: 1000; background: var(--primary); color: white; padding: 12px; display: flex; justify-content: space-around; cursor: pointer; font-weight: bold; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+
+        /* תפריט עליון */
+        .nav-bar { background: white; padding: 15px; display: flex; justify-content: center; gap: 25px; border-bottom: 1px solid #eee; }
+        .nav-bar a { text-decoration: none; color: var(--dark); font-weight: bold; cursor: pointer; }
+
+        /* לוגו */
+        .logo-section { padding: 25px; text-align: center; background: white; }
+        .logo-section img { max-width: 250px; width: 100%; border-radius: 15px; }
+
+        .container { max-width: 1000px; margin: 0 auto; padding: 20px; }
+
+        /* מחלקות - תמונות גדולות וברורות */
+        .dept-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin: 20px 0; }
+        .dept-card { background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.05); text-align: center; cursor: pointer; border: 1px solid #eee; }
+        .dept-card img { width: 100%; height: 120px; object-fit: cover; }
+        .dept-card h3 { margin: 10px 0; font-size: 1.1em; color: var(--dark); }
+
+        /* חיפוש - נקי */
+        .search-area { background: white; padding: 30px; border-radius: 20px; margin: 30px 0; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .search-input { width: 100%; max-width: 500px; padding: 15px; border-radius: 30px; border: 2px solid #ddd; font-size: 1.1em; text-align: center; outline: none; }
         
-        .cart-header { position: sticky; top: 0; z-index: 1000; background: var(--primary); color: white; padding: 12px; display: flex; justify-content: space-around; align-items: center; cursor: pointer; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        
-        /* תפריט ניווט פנימי */
-        .top-nav { background: white; padding: 10px; display: flex; justify-content: center; gap: 20px; border-bottom: 1px solid #eee; }
-        .top-nav a { text-decoration: none; color: var(--dark); font-weight: bold; font-size: 0.9em; }
+        /* גריד מוצרים - מופיע רק בחיפוש */
+        .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; margin-top: 20px; }
+        .product-card { background: white; border-radius: 12px; padding: 15px; border: 1px solid #eee; text-align: center; }
+        .price { color: var(--primary); font-size: 1.3em; font-weight: bold; margin: 10px 0; }
+        .add-btn { background: var(--dark); color: white; border: none; width: 100%; padding: 8px; border-radius: 6px; cursor: pointer; }
 
-        .logo-area { background: white; padding: 15px; text-align: center; }
-        .logo-area img { max-width: 200px; width: 100%; border-radius: 10px; }
-
-        .container { max-width: 1000px; margin: 0 auto; padding: 15px; }
-
-        /* כפתורי מחלקות */
-        .categories-nav { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 20px; }
-        .cat-btn { background: white; padding: 10px 5px; border-radius: 10px; text-align: center; font-size: 0.85em; font-weight: bold; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 1px solid transparent; }
-        .cat-btn:active { border-color: var(--primary); color: var(--primary); }
-
-        .search-box { width: 100%; box-sizing: border-box; padding: 15px; border-radius: 25px; border: 2px solid #ddd; font-size: 1.1em; text-align: center; outline: none; margin-bottom: 20px; }
-
-        .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
-        .product-card { background: white; border-radius: 15px; padding: 12px; text-align: center; border: 1px solid #eee; }
-        .price-tag { color: var(--primary); font-size: 1.4em; font-weight: 800; margin: 8px 0; }
-        .add-btn { background: var(--dark); color: white; border: none; width: 100%; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; }
-
-        /* סקשנים נוספים */
-        .info-section { background: white; padding: 25px; border-radius: 20px; margin-top: 30px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-        .review-card { background: #f9f9f9; padding: 15px; border-radius: 12px; margin-bottom: 10px; text-align: right; border-right: 4px solid var(--primary); }
-        
-        .waze-btn { background: #33ccff; color: white; padding: 10px 20px; border-radius: 50px; text-decoration: none; font-weight: bold; display: inline-block; margin-top: 10px; }
-
-        .shop-gallery { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 15px; }
-        .shop-gallery img { width: 100%; height: 100px; object-fit: cover; border-radius: 8px; }
+        /* דפים פנימיים - מוסתרים כברירת מחדל */
+        .page-content { display: none; background: white; padding: 25px; border-radius: 20px; margin-top: 20px; }
+        .active-page { display: block; }
 
         /* מודל עגלה */
         .modal { display: none; position: fixed; z-index: 2000; inset: 0; background: rgba(0,0,0,0.7); padding: 20px; }
-        .modal-content { background: white; border-radius: 20px; padding: 20px; max-width: 400px; margin: auto; }
-        .checkout-btn { background: var(--success); color: white; width: 100%; padding: 15px; border-radius: 12px; font-size: 1.2em; font-weight: bold; border: none; margin-top: 15px; }
+        .modal-content { background: white; border-radius: 20px; padding: 20px; max-width: 400px; margin: 50px auto; text-align: right; }
     </style>
 </head>
 <body>
 
-<div class="cart-header" onclick="toggleCart()">
+<div class="cart-sticky" onclick="toggleCart()">
     <span>🛒 <span id="cart-count">0</span> מוצרים</span>
     <span>סה"כ: ₪<span id="cart-total">0</span></span>
 </div>
 
-<div class="top-nav">
-    <a href="#home">בית</a>
-    <a href="#search-area">חיפוש/מלאי</a>
-    <a href="#reviews">חוות דעת</a>
-    <a href="#contact">צור קשר</a>
+<div class="nav-bar">
+    <a onclick="showPage('home')">🏠 דף הבית</a>
+    <a onclick="showPage('contact')">📞 צור קשר</a>
+    <a onclick="showPage('reviews')">⭐ חוות דעת</a>
 </div>
 
-<div class="logo-area" id="home">
-    <img src="images/logo.jpg" onerror="this.src='images/logo.png'" alt="Up Stock">
+<div id="home-page" class="page-content active-page">
+    <div class="logo-section">
+        <img src="images/logo.jpg" onerror="this.src='images/logo.png'" alt="Up Stock">
+    </div>
+
+    <div class="container">
+        <div class="dept-grid">
+            <div class="dept-card" onclick="filterBy('חד פעמי')"><img src="images/hadpaami.jpg"><h3>חד פעמי</h3></div>
+            <div class="dept-card" onclick="filterBy('אפייה')"><img src="images/bake1.jpeg"><h3>אפייה ומטבח</h3></div>
+            <div class="dept-card" onclick="filterBy('ניקיון')"><img src="images/clean1.jpeg"><h3>ניקיון</h3></div>
+            <div class="dept-card" onclick="filterBy('יום הולדת')"><img src="images/bday1.jpeg"><h3>ימי הולדת</h3></div>
+        </div>
+
+        <div class="search-area">
+            <h3>חיפוש מוצר במלאי</h3>
+            <input type="text" id="searchInput" class="search-input" placeholder="הקלד שם מוצר..." onkeyup="search()">
+            <div id="status-text" style="margin-top:10px; color:#888;">המוצרים יופיעו כאן בזמן החיפוש</div>
+            <div class="products-grid" id="product-list"></div>
+        </div>
+    </div>
 </div>
 
-<div class="container">
-    <div class="categories-nav">
-        <div class="cat-btn" onclick="filterByCategory('חד פעמי')">🍽️<br>חד פעמי</div>
-        <div class="cat-btn" onclick="filterByCategory('אפייה')">🥧<br>אפייה</div>
-        <div class="cat-btn" onclick="filterByCategory('ניקיון')">🧼<br>ניקיון</div>
-        <div class="cat-btn" onclick="filterByCategory('')">🔍<br>הכל</div>
+<div id="contact-page" class="page-content">
+    <div class="container">
+        <h2>📞 צור קשר</h2>
+        <p><strong>טלפון:</strong> 054-939-7753</p>
+        <p><strong>כתובת:</strong> רחוב הגיהנום 1 (עדכן את הכתובת שלך)</p>
+        <a href="https://waze.com/ul?q=Up%20Stock" style="background:#33ccff; color:white; padding:10px 20px; border-radius:50px; text-decoration:none; display:inline-block;">נווט אלינו ב-Waze 🚗</a>
     </div>
+</div>
 
-    <div id="search-area">
-        <input type="text" id="searchInput" class="search-box" placeholder="מה תרצו למצוא היום?" onkeyup="searchProducts()">
-        <div id="status-msg" style="margin-bottom:10px; font-weight:bold; color:#666;"></div>
-        <div class="products-grid" id="productDisplay"></div>
-    </div>
-
-    <div class="info-section" id="contact">
-        <h2>📍 איפה אנחנו?</h2>
-        <p><strong>כתובת:</strong> רחוב הגיהנום 1 (סתם, כתוב את הכתובת שלך כאן!)</p>
-        <p><strong>שעות פתיחה:</strong> א'-ה' 09:00-20:00 | ו' 08:30-14:00</p>
-        <a href="https://waze.com/ul?q=Up%20Stock" class="waze-btn">נווט אלינו ב-Waze 🚗</a>
-        <br><br>
-        <a href="tel:0549397753" style="color:var(--dark); font-weight:bold;">📞 חייגו אלינו: 054-939-7753</a>
-    </div>
-
-    <div class="info-section" id="reviews">
-        <h2>⭐ מה הלקוחות אומרים</h2>
-        <div class="review-card">
-            <strong>"שירות מעולה ומחירים הכי טובים שמצאתי!"</strong>
-            <p>- מיכל כהן</p>
+<div id="reviews-page" class="page-content">
+    <div class="container">
+        <h2>⭐ חוות דעת לקוחות</h2>
+        <div style="background:#f9f9f9; padding:15px; border-radius:10px; margin-bottom:10px;">
+            "שירות מהיר ומחירים מצוינים!" - אורי ש.
         </div>
-        <div class="review-card">
-            <strong>"תמיד יש הכל במלאי, והחיפוש באתר חוסך לי המון זמן."</strong>
-            <p>- ישראל ישראלי</p>
+        <div style="background:#f9f9f9; padding:15px; border-radius:10px;">
+            "הכי נוח שיש בדיקת מלאי אונליין." - דנה ל.
         </div>
     </div>
-
-    <h3 style="text-align:right; margin-top:30px;">החנות שלנו</h3>
-    <div class="shop-gallery" id="galleryContainer"></div>
 </div>
 
 <div id="cartModal" class="modal">
     <div class="modal-content">
-        <h2 style="text-align:center">הסל שלי</h2>
-        <div id="cartList" style="max-height:250px; overflow-y:auto;"></div>
-        <div style="font-size:1.5em; font-weight:bold; margin-top:15px; text-align:center;">סה"כ: ₪<span id="modal-total">0</span></div>
-        <button class="checkout-btn" onclick="sendOrder()">שלח הזמנה לוואטסאפ ✅</button>
-        <button onclick="toggleCart()" style="width:100%; background:none; border:none; margin-top:10px; color:#888;">סגור וחזור לקניות</button>
+        <h3>הסל שלי</h3>
+        <div id="cartItems"></div>
+        <hr>
+        <h4>סה"כ: ₪<span id="modal-total">0</span></h4>
+        <button onclick="sendToWA()" style="background:#25d366; color:white; border:none; width:100%; padding:15px; border-radius:10px; font-weight:bold; cursor:pointer;">שלח הזמנה בוואטסאפ</button>
+        <button onclick="toggleCart()" style="width:100%; background:none; border:none; margin-top:10px; color:#999;">סגור</button>
     </div>
 </div>
 
@@ -117,89 +117,68 @@
 let inventory = [];
 let cart = [];
 
-// טעינת גלריה
-const gallery = document.getElementById('galleryContainer');
-for(let i=1; i<=11; i++) {
-    const img = document.createElement('img');
-    img.src = `images/shop${i}.jpg`;
-    img.onerror = function() { this.src = `images/shop${i}.jpeg`; this.onerror = () => this.style.display='none'; };
-    gallery.appendChild(img);
-}
-
-async function init() {
+async function load() {
     try {
-        const res = await fetch('stock.csv?v=' + Date.now());
-        const data = await res.text();
-        const rows = data.split('\n').slice(2);
-        inventory = rows.map(row => {
-            const cols = row.split(/[;,]/);
-            return {
-                name: cols[2]?.replace(/"/g, '').trim(),
-                price: parseFloat(cols[6]),
-                category: cols[1]?.replace(/"/g, '').trim() || ""
-            };
+        const r = await fetch('stock.csv?v=' + Date.now());
+        const t = await r.text();
+        inventory = t.split('\n').slice(2).map(row => {
+            const c = row.split(/[;,]/);
+            return { name: c[2]?.replace(/"/g,''), price: parseFloat(c[6]), cat: c[1] };
         }).filter(p => p.name && !isNaN(p.price));
-    } catch (e) { console.error("CSV error"); }
+    } catch(e) { console.log("Error loading CSV"); }
 }
 
-function display(products) {
-    const grid = document.getElementById('productDisplay');
-    grid.innerHTML = products.map(p => `
+function showPage(pageId) {
+    document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active-page'));
+    document.getElementById(pageId + '-page').classList.add('active-page');
+    window.scrollTo(0,0);
+}
+
+function search() {
+    const q = document.getElementById('searchInput').value.toLowerCase().trim();
+    const list = document.getElementById('product-list');
+    const status = document.getElementById('status-text');
+    if(!q) { list.innerHTML = ""; status.innerText = "המוצרים יופיעו כאן בזמן החיפוש"; return; }
+    const res = inventory.filter(p => p.name.toLowerCase().includes(q));
+    status.innerText = res.length ? `נמצאו ${res.length} מוצרים:` : "לא נמצאו תוצאות";
+    list.innerHTML = res.map(p => `
         <div class="product-card">
-            <div style="font-size:0.9em; height:40px; overflow:hidden;">${p.name}</div>
-            <div class="price-tag">₪${p.price.toFixed(2)}</div>
-            <button class="add-btn" onclick="addToCart('${p.name.replace(/'/g,"")}', ${p.price})">הוסף לסל +</button>
+            <div style="font-size:0.9em; height:35px; overflow:hidden;">${p.name}</div>
+            <div class="price">₪${p.price.toFixed(2)}</div>
+            <button class="add-btn" onclick="add('${p.name.replace(/'/g,"")}', ${p.price})">הוסף +</button>
         </div>
     `).join('');
 }
 
-function searchProducts() {
-    const term = document.getElementById('searchInput').value.toLowerCase();
-    if(!term) { document.getElementById('productDisplay').innerHTML = ""; return; }
-    const filtered = inventory.filter(p => p.name.toLowerCase().includes(term));
-    display(filtered);
+function filterBy(cat) {
+    document.getElementById('searchInput').value = cat;
+    search();
 }
 
-function filterByCategory(cat) {
-    document.getElementById('searchInput').value = "";
-    const filtered = inventory.filter(p => p.category.includes(cat) || p.name.includes(cat));
-    document.getElementById('status-msg').innerText = cat ? "מציג: " + cat : "כל המוצרים";
-    display(filtered.slice(0, 24));
-    window.location.hash = 'search-area';
+function add(name, price) {
+    const i = cart.find(x => x.name === name);
+    if(i) i.qty++; else cart.push({name, price, qty:1});
+    updateUI();
 }
 
-function addToCart(name, price) {
-    const item = cart.find(i => i.name === name);
-    if(item) item.qty++; else cart.push({name, price, qty: 1});
-    updateCartUI();
-}
-
-function updateCartUI() {
-    const count = cart.reduce((s, i) => s + i.qty, 0);
-    const total = cart.reduce((s, i) => s + (i.price * i.qty), 0);
+function updateUI() {
+    const count = cart.reduce((s,i) => s+i.qty, 0);
+    const total = cart.reduce((s,i) => s+(i.price*i.qty), 0);
     document.getElementById('cart-count').innerText = count;
     document.getElementById('cart-total').innerText = total.toFixed(2);
     document.getElementById('modal-total').innerText = total.toFixed(2);
-    document.getElementById('cartList').innerHTML = cart.map((i, idx) => `
-        <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #eee;">
-            <span>${i.name} (x${i.qty})</span>
-            <button onclick="removeItem(${idx})" style="border:none; background:none; cursor:pointer;">❌</button>
-        </div>
-    `).join('');
+    document.getElementById('cartItems').innerHTML = cart.map(i => `<div>${i.name} (x${i.qty})</div>`).join('');
 }
 
-function removeItem(idx) { cart.splice(idx, 1); updateCartUI(); }
 function toggleCart() { const m = document.getElementById('cartModal'); m.style.display = m.style.display === 'block' ? 'none' : 'block'; }
 
-function sendOrder() {
-    if(cart.length === 0) return;
-    let text = "הזמנה מ-Up סטוק:\n\n";
-    cart.forEach(i => text += `• ${i.name} (x${i.qty})\n`);
-    text += `\n*סה"כ: ₪${document.getElementById('modal-total').innerText}*`;
-    window.open(`https://wa.me/972549397753?text=${encodeURIComponent(text)}`);
+function sendToWA() {
+    let msg = "הזמנה מ-Up סטוק:\n";
+    cart.forEach(i => msg += `• ${i.name} x${i.qty}\n`);
+    window.open(`https://wa.me/972549397753?text=${encodeURIComponent(msg)}`);
 }
 
-window.onload = init;
+window.onload = load;
 </script>
 </body>
 </html>
