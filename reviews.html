@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>חוות דעת | Up סטוק</title>
+    <style>
+        :root { --primary: #ed1c24; --light: #f4f4f4; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; margin: 0; background: var(--light); direction: rtl; text-align: center; }
+        
+        /* תפריט ניווט עליון */
+        .nav-bar { background: white; padding: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); display: flex; justify-content: center; gap: 25px; margin-bottom: 30px; }
+        .nav-bar a { text-decoration: none; color: #333; font-weight: bold; font-size: 1.1em; }
+        .nav-bar a:hover { color: var(--primary); }
+
+        .container { max-width: 800px; margin: 0 auto; padding: 0 20px; }
+        .review-card { background: white; padding: 20px; border-radius: 15px; margin-bottom: 20px; text-align: right; border-right: 5px solid var(--primary); box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        .stars { color: #f1c40f; margin-bottom: 5px; }
+        .reviewer { font-weight: bold; font-size: 1.1em; }
+        .form-section { background: #fff; padding: 25px; border-radius: 15px; margin-top: 40px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        textarea { width: 100%; height: 100px; padding: 10px; border-radius: 10px; border: 1px solid #ddd; margin-top: 10px; box-sizing: border-box; font-family: inherit; }
+        .btn-submit { background: var(--primary); color: white; border: none; padding: 12px 25px; border-radius: 5px; cursor: pointer; margin-top: 10px; font-weight: bold; font-size: 1em; }
+        .back-home { display: block; margin-top: 30px; color: #666; text-decoration: none; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="nav-bar">
+    <a href="index.html">🏠 דף הבית</a>
+    <a href="contact.html">📞 יצירת קשר</a>
+    <a href="reviews.html" style="color: var(--primary);">💬 חוות דעת</a>
+</div>
+
+<div class="container">
+    <h1>💬 מה הלקוחות אומרים</h1>
+
+    <div class="review-card">
+        <div class="stars">⭐⭐⭐⭐⭐</div>
+        <p>"חנות מדהימה! יש בה הכל לבית והשירות של הצוות פשוט יוצא מן הכלל."</p>
+        <div class="reviewer">שמעון לוי</div>
+    </div>
+
+    <div class="review-card">
+        <div class="stars">⭐⭐⭐⭐⭐</div>
+        <p>"המחירים הכי טובים שמצאתי באור יהודה למוצרי ניקיון ואפייה."</p>
+        <div class="reviewer">רחל א.</div>
+    </div>
+
+    <div class="form-section">
+        <h3>הוספת חוות דעת</h3>
+        <p>כתבו לנו וזה יישלח אלינו לוואטסאפ:</p>
+        <textarea id="reviewText" placeholder="איך הייתה החוויה שלכם?"></textarea><br>
+        <button class="btn-submit" onclick="sendReview()">שלח חוות דעת בוואטסאפ</button>
+    </div>
+
+    <a href="index.html" class="back-home">← חזרה לדף הבית</a>
+</div>
+
+<script>
+    function sendReview() {
+        const text = document.getElementById('reviewText').value;
+        if (text) {
+            window.location.href = "https://wa.me/972508810105?text=" + encodeURIComponent("חוות דעת חדשה מהאתר: " + text);
+        } else {
+            alert("אנא כתבו משהו לפני השליחה");
+        }
+    }
+</script>
+
+</body>
+</html>
