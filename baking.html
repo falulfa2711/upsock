@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>אפייה ומטבח | Up סטוק</title>
+    <style>
+        :root { --primary: #ed1c24; --bake-color: #d35400; --dark: #333; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; background: #fdf2e9; text-align: center; }
+        
+        nav { background: var(--dark); padding: 15px; position: sticky; top: 0; z-index: 100; }
+        nav a { color: white; text-decoration: none; margin: 0 15px; font-weight: bold; }
+
+        header { background: var(--bake-color); color: white; padding: 40px 20px; }
+        
+        .gallery-container { max-width: 1200px; margin: 30px auto; padding: 0 20px; }
+        
+        .gallery-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
+            gap: 15px; 
+        }
+        
+        .gallery-item { 
+            background: white; border-radius: 12px; overflow: hidden; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1); height: 250px; border: 3px solid white;
+        }
+        
+        .gallery-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+        .info-section { background: white; padding: 40px 20px; border-top: 5px solid var(--bake-color); margin-top: 40px; }
+        .btn-whatsapp { display: inline-block; background:#25d366; color:white; padding:15px 25px; text-decoration:none; border-radius:50px; font-weight:bold; }
+    </style>
+</head>
+<body>
+
+<nav>
+    <a href="index.html">🏠 חזרה לדף הבית</a>
+    <a href="birthday.html">🎈 ימי הולדת</a>
+</nav>
+
+<header>
+    <h1>🥧 מחלקת אפייה ומטבח - UP סטוק</h1>
+    <p>תבניות, אביזרי אפייה, כלי הגשה וכל מה שצריך למטבח שלכם</p>
+</header>
+
+<div class="gallery-container">
+    <div class="gallery-grid">
+        <div class="gallery-item"><img src="images/bake1.jpeg" alt="אפייה 1"></div>
+        <div class="gallery-item"><img src="images/bake2.jpeg" alt="אפייה 2"></div>
+        <div class="gallery-item"><img src="images/bake3.jpeg" alt="אפייה 3"></div>
+        <div class="gallery-item"><img src="images/bake4.jpeg" alt="אפייה 4"></div>
+    </div>
+</div>
+
+<div class="info-section">
+    <h3>רוצים לשדרג את המטבח?</h3>
+    <a href="https://wa.me/972549397753" class="btn-whatsapp">דברו איתנו בווטסאפ</a>
+</div>
+
+</body>
+</html>
