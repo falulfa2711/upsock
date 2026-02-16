@@ -8,13 +8,13 @@
         :root { --primary: #ed1c24; --secondary: #ffcc00; --dark: #1a1a1a; --bg: #ffffff; }
         body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; margin: 0; background: var(--bg); direction: rtl; }
         
-        /* סרגל ניווט מלא */
+        /* סרגל ניווט מעודכן לפי בקשתך */
         .nav-bar { 
             background: white; 
             padding: 12px; 
             display: flex; 
             justify-content: center; 
-            gap: 20px; 
+            gap: 15px; 
             border-bottom: 1px solid #eee; 
             box-shadow: 0 2px 5px rgba(0,0,0,0.05);
             position: sticky;
@@ -25,61 +25,54 @@
             text-decoration: none; 
             color: #444; 
             font-weight: 600; 
-            font-size: 0.95em; 
+            font-size: 0.9em; 
             display: flex;
             align-items: center;
-            gap: 5px;
+            gap: 4px;
         }
+        .nav-bar a.active-promo { color: var(--primary); font-weight: 800; }
         .nav-bar a:hover { color: var(--primary); }
 
         .container { max-width: 900px; margin: 0 auto; padding: 15px; }
 
-        /* באנר דילים שווים */
+        /* באנר דילים שווים קומפקטי */
         .promo-header { 
-            background: var(--primary); color: white; padding: 15px; 
-            text-align: center; border-radius: 10px; margin-bottom: 25px;
-            box-shadow: 0 4px 8px rgba(237, 28, 36, 0.2);
+            background: var(--primary); color: white; padding: 12px; 
+            text-align: center; border-radius: 8px; margin-bottom: 20px;
         }
-        .promo-header h1 { margin: 0; font-size: 1.6em; letter-spacing: 1px; }
+        .promo-header h1 { margin: 0; font-size: 1.4em; }
 
-        /* גריד מוצרים קומפקטי */
+        /* גריד מוצרים */
         .promo-grid { 
             display: grid; 
             grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); 
-            gap: 15px; 
+            gap: 12px; 
         }
 
         .promo-card { 
-            background: #fff; border-radius: 12px; padding: 15px;
+            background: #fff; border-radius: 10px; padding: 12px;
             border: 1px solid #eee; text-align: center;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.03);
             display: flex; flex-direction: column; justify-content: space-between;
-            transition: transform 0.2s;
         }
-        .promo-card:hover { transform: translateY(-3px); border-color: var(--secondary); }
 
-        /* תגית המבצע (מהקובץ שלך) */
+        /* תגית המבצע הצהובה */
         .deal-badge {
-            background: var(--secondary); color: black; padding: 5px;
-            font-weight: 800; border-radius: 6px; font-size: 0.95em;
-            margin-bottom: 10px; border: 1.5px solid #000;
-            box-shadow: 2px 2px 0px rgba(0,0,0,1);
+            background: var(--secondary); color: black; padding: 4px;
+            font-weight: 800; border-radius: 4px; font-size: 0.9em;
+            margin-bottom: 8px; border: 1px solid #000;
         }
 
-        .product-name { 
-            font-size: 1em; font-weight: 600; margin: 5px 0; color: #222; 
-            height: 45px; overflow: hidden; line-height: 1.2;
-        }
+        .product-name { font-size: 1em; font-weight: 600; margin: 5px 0; color: #333; height: 40px; overflow: hidden; }
         
-        .price-section { margin-top: 10px; padding-top: 10px; border-top: 1px dashed #eee; }
-        .price-val { color: var(--primary); font-size: 1.3em; font-weight: bold; }
-        .unit-label { font-size: 0.75em; color: #888; display: block; margin-top: 2px; }
+        .price-section { margin-top: 8px; padding-top: 8px; border-top: 1px dashed #ddd; }
+        .price-val { color: var(--primary); font-size: 1.2em; font-weight: bold; }
+        .unit-label { font-size: 0.7em; color: #999; display: block; }
 
-        .footer-action { text-align: center; margin-top: 40px; padding-bottom: 40px; }
+        .footer-link { text-align: center; margin-top: 30px; padding-bottom: 30px; }
         .btn-home { 
-            display: inline-block; padding: 12px 30px; background: var(--dark); 
-            color: white; text-decoration: none; border-radius: 50px; 
-            font-weight: bold; font-size: 0.9em;
+            display: inline-block; padding: 10px 20px; background: var(--dark); 
+            color: white; text-decoration: none; border-radius: 5px; font-size: 0.85em;
         }
     </style>
 </head>
@@ -87,8 +80,9 @@
 
 <div class="nav-bar">
     <a href="index.html">🏠 בית</a>
-    <a href="reviews.html">⭐ חוות דעת</a>
+    <a href="promos.html" class="active-promo">🔥 דילים שווים</a>
     <a href="contact.html">📞 צור קשר</a>
+    <a href="reviews.html">⭐ חוות דעת</a>
 </div>
 
 <div class="container">
@@ -97,20 +91,18 @@
     </div>
 
     <div id="promo-container" class="promo-grid">
-        <div style="text-align:center; grid-column: 1/-1; padding: 40px; color: #888;">
-            בודק דילים חמים במלאי...
-        </div>
+        <div style="text-align:center; grid-column: 1/-1; padding: 30px; color: #888;">טוען מוצרים במבצע...</div>
     </div>
 
-    <div class="footer-action">
-        <a href="index.html" class="btn-home">לחיפוש והזמנת מוצרים לחץ כאן</a>
+    <div class="footer-link">
+        <a href="index.html" class="btn-home">חזרה לחיפוש מוצרים והזמנה</a>
     </div>
 </div>
 
 <script>
 async function loadDeals() {
     try {
-        // 1. טעינת קובץ המבצעים החדש שלך
+        // 1. טעינת המבצעים מהקובץ שלך
         const pRes = await fetch('stock_promos.csv?t=' + Date.now());
         const pData = await pRes.text();
         const pRows = pData.split('\n');
@@ -125,7 +117,7 @@ async function loadDeals() {
             }
         });
 
-        // 2. טעינת קובץ המלאי הראשי להצלבת נתונים
+        // 2. טעינת המלאי הראשי
         const sRes = await fetch('stock.csv?t=' + Date.now());
         const sData = await sRes.text();
         const sRows = sData.split('\n').slice(2);
@@ -141,7 +133,6 @@ async function loadDeals() {
                 const name = cols[2]?.replace(/"/g, '').trim();
                 const price = parseFloat(cols[6]?.replace(/"/g, '').trim());
 
-                // הצלבה: אם הברקוד מהמלאי קיים בקובץ המבצעים
                 if (promos[barcode]) {
                     found = true;
                     container.innerHTML += `
@@ -150,7 +141,7 @@ async function loadDeals() {
                             <div class="product-name">${name}</div>
                             <div class="price-section">
                                 <span class="price-val">₪${price.toFixed(2)}</span>
-                                <span class="unit-label">ליחידה בודדת</span>
+                                <span class="unit-label">מחיר ליחידה בודדת</span>
                             </div>
                         </div>
                     `;
@@ -159,20 +150,12 @@ async function loadDeals() {
         });
 
         if (!found) {
-            container.innerHTML = `
-                <div style="grid-column: 1/-1; text-align: center; padding: 40px;">
-                    <p style="color: #666; font-size: 1.1em;">כרגע אין דילים פעילים. שווה לחזור בקרוב!</p>
-                </div>`;
+            container.innerHTML = "<p style='grid-column: 1/-1; text-align: center;'>אין דילים פעילים כרגע.</p>";
         }
     } catch (e) {
-        document.getElementById('promo-container').innerHTML = `
-            <div style="grid-column: 1/-1; text-align: center; color: red; padding: 20px;">
-                שגיאה בטעינת הנתונים. וודא שקובץ המבצעים קיים ב-GitHub.
-            </div>`;
+        document.getElementById('promo-container').innerHTML = "שגיאה בטעינת הנתונים.";
     }
 }
-
-// הפעלה בטעינת הדף
 window.onload = loadDeals;
 </script>
 
