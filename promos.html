@@ -2,90 +2,46 @@
 <html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Up סטוק | דילים חמים</title>
+    <title>Up סטוק | דילים</title>
     <style>
-        :root { --primary: #ed1c24; --secondary: #ffcc00; --bg: #fdfdfd; }
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; margin: 0; background: var(--bg); direction: rtl; }
-        .nav-bar { background: white; padding: 12px; display: flex; justify-content: center; gap: 15px; border-bottom: 1px solid #eee; position: sticky; top: 0; z-index: 1000; }
-        .nav-bar a { text-decoration: none; color: #444; font-weight: 600; }
-        .container { max-width: 1000px; margin: 0 auto; padding: 15px; }
-        .promo-header { background: var(--primary); color: white; padding: 12px; text-align: center; border-radius: 8px; margin-bottom: 20px; }
-        .promo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px; }
-        .promo-card { background: #fff; border-radius: 10px; padding: 15px; border: 1px solid #eee; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-        .deal-badge { background: var(--secondary); color: black; padding: 6px; font-weight: 800; border-radius: 5px; font-size: 0.9em; margin-bottom: 10px; border: 1.5px solid #000; }
-        .product-name { font-size: 0.95em; font-weight: 600; min-height: 45px; margin-bottom: 10px; }
-        .price-val { color: var(--primary); font-size: 1.3em; font-weight: bold; }
+        body { font-family: sans-serif; background: #f4f4f4; direction: rtl; text-align: center; }
+        .container { max-width: 800px; margin: 20px auto; padding: 20px; }
+        .promo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; }
+        .card { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border: 1px solid #ddd; }
+        .badge { background: #ffcc00; font-weight: bold; padding: 5px; border-radius: 4px; display: block; margin-bottom: 10px; }
+        .price { color: #ed1c24; font-size: 1.5em; font-weight: bold; }
     </style>
 </head>
 <body>
+    <h1>🔥 המבצעים שלנו 🔥</h1>
+    <div class="container">
+        <div id="promo-list" class="promo-grid">טוען...</div>
+    </div>
 
-<div class="nav-bar">
-    <a href="index.html">🏠 בית</a>
-    <a href="promos.html" style="color:var(--primary); font-weight:800;">🔥 דילים שווים</a>
-</div>
-
-<div class="container">
-    <div class="promo-header"><h1>🔥 מבצעים חמים מהמלאי 🔥</h1></div>
-    <div id="promo-container" class="promo-grid">טוען נתונים...</div>
-</div>
-
-<script>
-// כאן רשומים המבצעים שלך - פשוט וקל
-const MY_PROMOS = [
-    { key: "כוסות", text: "מבצע 3 ב-10" },
-    { key: "מגבונים", text: "מבצע 4 ב-20" },
-    { key: "טונה", text: "מבצע 4 ב-22" },
-    { key: "שמן", text: "מבצע 2 ב-18" }
-];
-
-async function loadDeals() {
-    try {
-        const sRes = await fetch('stock.csv?t=' + Date.now());
-        const sText = await sRes.text();
-        const sRows = sText.split(/\r?\n/);
-        
-        const container = document.getElementById('promo-container');
-        container.innerHTML = "";
-        let foundAny = false;
-        let displayedNames = new Set();
-
-        sRows.forEach((row, idx) => {
-            if (idx === 0 || !row.trim()) return;
+    <script>
+    async function load() {
+        try {
+            const res = await fetch('stock_promos.csv?t=' + Date.now());
+            const text = await res.text();
+            const rows = text.split(/\r?\n/);
+            let html = '';
             
-            // פיצול שורה לפי פסיקים
-            const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
-            const fullName = (cols[2] || "").replace(/"/g, '').trim();
-            const price = (cols[6] || "0").replace(/"/g, '').trim();
-
-            if (!fullName) return;
-
-            // בדיקה אם אחת ממילות המבצע נמצאת בשם המוצר
-            MY_PROMOS.forEach(promo => {
-                if (fullName.includes(promo.key)) {
-                    if (!displayedNames.has(fullName)) {
-                        foundAny = true;
-                        displayedNames.add(fullName);
-                        container.innerHTML += `
-                            <div class="promo-card">
-                                <div class="deal-badge">${promo.text}</div>
-                                <div class="product-name">${fullName}</div>
-                                <div class="price-val">₪${price}</div>
-                            </div>`;
-                    }
+            rows.forEach((row, idx) => {
+                if (idx === 0 || !row.trim()) return;
+                const cols = row.split(',');
+                if (cols.length >= 3) {
+                    html += `
+                    <div class="card">
+                        <span class="badge">${cols[1]}</span>
+                        <h3>${cols[0]}</h3>
+                        <div class="price">₪${cols[2]}</div>
+                    </div>`;
                 }
             });
-        });
-
-        if (!foundAny) {
-            container.innerHTML = "<p>לא נמצאו מוצרים תואמים במלאי.</p>";
-        }
-    } catch (e) {
-        console.error(e);
-        document.getElementById('promo-container').innerHTML = "שגיאה בטעינת המלאי.";
+            document.getElementById('promo-list').innerHTML = html || "אין מבצעים כרגע";
+        } catch (e) { document.getElementById('promo-list').innerHTML = "שגיאה בטעינה"; }
     }
-}
-window.onload = loadDeals;
-</script>
+    window.onload = load;
+    </script>
 </body>
 </html>
