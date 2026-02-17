@@ -22,11 +22,6 @@
         .logo-section { padding: 30px 20px; text-align: center; background: white; }
         .logo-section img { max-width: 400px; width: 100%; border-radius: 20px; }
 
-        .promo-banner {
-            max-width: 1000px; margin: 20px auto; background: linear-gradient(135deg, #ed1c24, #911115);
-            color: white; padding: 25px; border-radius: 15px; text-align: center;
-        }
-
         .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
 
         /* מחלקות */
@@ -39,21 +34,13 @@
         .search-area { background: white; padding: 40px 20px; border-radius: 20px; margin: 40px 0; box-shadow: 0 4px 20px rgba(0,0,0,0.05); text-align: center; }
         .search-input { width: 100%; max-width: 600px; padding: 18px 30px; border-radius: 50px; border: 2px solid #eee; font-size: 1.2em; outline: none; text-align: center; }
         
-        /* גריד מוצרים - יופיע רק בחיפוש */
         .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; margin-top: 30px; }
         .product-card { background: white; border-radius: 15px; padding: 15px; border: 1px solid #f0f0f0; position: relative; }
         .product-card .price { font-size: 1.5em; color: var(--primary); font-weight: bold; margin: 10px 0; }
         .add-btn { background: var(--dark); color: white; border: none; width: 100%; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: bold; }
 
-        /* גלריה מלאה של החנות */
-        .shop-gallery { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); 
-            gap: 15px; 
-            margin: 40px 0; 
-        }
+        .shop-gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; margin: 40px 0; }
         .shop-gallery img { width: 100%; height: 200px; object-fit: cover; border-radius: 12px; transition: 0.3s; cursor: pointer; }
-        .shop-gallery img:hover { transform: scale(1.03); }
 
         /* מודל סל */
         .modal { display: none; position: fixed; z-index: 3000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); }
@@ -63,43 +50,15 @@
 </head>
 <body>
 
-// --- הקוד המעודכן לסרגל העגלה שלך ---
+<div class="cart-sticky-header" onclick="toggleCart()">
+    🛒 מוצרים בסל: <span id="cart-count">0</span> | סה"כ: ₪<span id="cart-total-header">0.00</span>
+</div>
 
-function updateStickyHeader() {
-    // שליפת העגלה מהזיכרון (זה מה שדף המבצעים מעדכן)
-    const cart = JSON.parse(localStorage.getItem('cart')) || [];
-    
-    // עדכון המספר בתוך ה-Span שמצאנו בצילום מסך שלך
-    const countElement = document.getElementById('cart-count');
-    if (countElement) {
-        countElement.innerText = cart.length;
-    }
-}
-
-// פקודה להפעיל את העדכון מיד כשהדף נטען
-window.addEventListener('DOMContentLoaded', updateStickyHeader);
-
-// פונקציית ה-Toggle הקיימת שלך (נשארת אותו דבר)
-function toggleCart() {
-    const cartSection = document.getElementById('cart-section');
-    if (cartSection.style.display === 'none' || cartSection.style.display === '') {
-        cartSection.style.display = 'block';
-        displayCart(); // הפונקציה שלך שמציגה את הפריטים
-    } else {
-        cartSection.style.display = 'none';
-    }
-}
-
-// בדיקה אם הגענו מדף המבצעים וצריך לפתוח את העגלה אוטומטית
-if (window.location.search.includes('openCart=true')) {
-    window.addEventListener('load', toggleCart);
-}
-
-<div class="nav-bar" style="background: white; padding: 12px; display: flex; justify-content: center; gap: 15px; border-bottom: 1px solid #eee; position: sticky; top: 0; z-index: 1000;">
-    <a href="index.html" style="text-decoration: none; color: #444; font-weight: 600;">🏠 בית</a>
-    <a href="promos.html" style="text-decoration: none; color: #ed1c24; font-weight: 800;">🔥 דילים שווים</a>
-    <a href="contact.html" style="text-decoration: none; color: #444; font-weight: 600;">📞 צור קשר</a>
-    <a href="reviews.html" style="text-decoration: none; color: #444; font-weight: 600;">⭐ חוות דעת</a>
+<div class="nav-bar">
+    <a href="index.html">🏠 בית</a>
+    <a href="promos.html" style="color: #ed1c24; font-weight: 800;">🔥 דילים שווים</a>
+    <a href="contact.html">📞 צור קשר</a>
+    <a href="reviews.html">⭐ חוות דעת</a>
 </div>
 
 <div class="logo-section">
@@ -149,6 +108,13 @@ if (window.location.search.includes('openCart=true')) {
 let allProducts = [];
 let cart = [];
 
+// פונקציית סנכרון חדשה
+function syncCartFromStorage() {
+    const savedCart = JSON.parse(localStorage.getItem('cart')) || [];
+    cart = savedCart;
+    updateUI();
+}
+
 async function loadInventory() {
     try {
         const response = await fetch('stock.csv?t=' + Date.now());
@@ -170,13 +136,11 @@ async function loadInventory() {
 function renderProducts(products) {
     const container = document.getElementById('dynamic-products');
     const status = document.getElementById('search-status');
-    
     if (products.length === 0) {
         container.innerHTML = "";
         status.innerText = "לא נמצאו מוצרים תואמים.";
         return;
     }
-    
     status.innerText = `נמצאו ${products.length} מוצרים:`;
     container.innerHTML = products.map(p => `
         <div class="product-card">
@@ -190,15 +154,11 @@ function renderProducts(products) {
 
 function filterProducts() {
     const q = document.getElementById('productSearch').value.toLowerCase().trim();
-    const container = document.getElementById('dynamic-products');
-    const status = document.getElementById('search-status');
-
     if (!q) {
-        container.innerHTML = "";
-        status.innerText = "הקלידו כדי לחפש מוצרים במלאי";
+        document.getElementById('dynamic-products').innerHTML = "";
+        document.getElementById('search-status').innerText = "הקלידו כדי לחפש מוצרים במלאי";
         return;
     }
-
     const words = q.split(/\s+/);
     const filtered = allProducts.filter(p => words.every(w => p.name.toLowerCase().includes(w)));
     renderProducts(filtered);
@@ -207,25 +167,32 @@ function filterProducts() {
 function addToCart(name, price) {
     const existing = cart.find(i => i.name === name);
     if (existing) existing.qty++; else cart.push({ name, price, qty: 1 });
+    localStorage.setItem('cart', JSON.stringify(cart)); // שמירה לזיכרון
     updateUI();
 }
 
 function updateUI() {
-    const count = cart.reduce((s, i) => s + i.qty, 0);
-    const total = cart.reduce((s, i) => s + (i.price * i.qty), 0);
-    document.getElementById('cart-count').innerText = count;
-    document.getElementById('cart-total-header').innerText = total.toFixed(2);
-    document.getElementById('cart-total-modal').innerText = total.toFixed(2);
+    const count = cart.reduce((s, i) => s + (i.qty || 1), 0);
+    const total = cart.reduce((s, i) => s + (i.price * (i.qty || 1)), 0);
+    
+    if(document.getElementById('cart-count')) document.getElementById('cart-count').innerText = count;
+    if(document.getElementById('cart-total-header')) document.getElementById('cart-total-header').innerText = total.toFixed(2);
+    if(document.getElementById('cart-total-modal')) document.getElementById('cart-total-modal').innerText = total.toFixed(2);
     
     document.getElementById('cart-items-list').innerHTML = cart.map((i, idx) => `
         <div class="cart-item">
-            <div><strong>${i.name}</strong> (x${i.qty})</div>
+            <div><strong>${i.name}</strong> (x${i.qty || 1})</div>
             <button onclick="removeItem(${idx})" style="background:none; border:none; color:red; cursor:pointer;">❌</button>
         </div>
     `).join('');
 }
 
-function removeItem(idx) { cart.splice(idx, 1); updateUI(); }
+function removeItem(idx) { 
+    cart.splice(idx, 1); 
+    localStorage.setItem('cart', JSON.stringify(cart));
+    updateUI(); 
+}
+
 function toggleCart() {
     const m = document.getElementById('cartModal');
     m.style.display = m.style.display === 'block' ? 'none' : 'block';
@@ -234,14 +201,20 @@ function toggleCart() {
 function sendToWhatsApp() {
     if (cart.length === 0) return;
     let msg = "שלום Up סטוק, אני רוצה להזמין:\n\n";
-    cart.forEach(i => msg += `• ${i.name} (x${i.qty}) - ₪${(i.price * i.qty).toFixed(2)}\n`);
+    cart.forEach(i => msg += `• ${i.name} (x${i.qty || 1}) - ₪${(i.price * (i.qty || 1)).toFixed(2)}\n`);
     msg += `\n*סה"כ: ₪${document.getElementById('cart-total-modal').innerText}*`;
     window.open(`https://wa.me/972549397753?text=${encodeURIComponent(msg)}`);
 }
 
-window.onload = loadInventory;
+// הפעלה בטעינה
+window.onload = function() {
+    loadInventory();
+    syncCartFromStorage();
+    // אם הגענו עם פקודת פתיחה מדף המבצעים
+    if (window.location.search.includes('openCart=true')) {
+        toggleCart();
+    }
+};
 </script>
 </body>
 </html>
-
-
