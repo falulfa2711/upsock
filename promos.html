@@ -3,52 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Up סטוק | דילים שווים</title>
+    <title>Up סטוק | אבחון מערכת</title>
     <style>
-        :root { --primary: #ed1c24; --secondary: #ffcc00; --bg: #f9f9f9; }
-        body { font-family: 'Segoe UI', system-ui, sans-serif; margin: 0; background: var(--bg); direction: rtl; }
-        .nav-bar { background: white; padding: 12px; display: flex; justify-content: center; gap: 15px; border-bottom: 1px solid #eee; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        .nav-bar a { text-decoration: none; color: #444; font-weight: 600; font-size: 0.95em; }
-        .nav-bar a.active { color: var(--primary); font-weight: 800; }
-        .container { max-width: 900px; margin: 0 auto; padding: 15px; }
-        .promo-header { background: var(--primary); color: white; padding: 12px; text-align: center; border-radius: 8px; margin-bottom: 20px; }
+        body { font-family: sans-serif; direction: rtl; padding: 20px; background: #f0f0f0; }
+        .debug-box { background: #fff; border: 2px solid #ed1c24; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
         .promo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
-        .promo-card { background: #fff; border-radius: 10px; padding: 12px; border: 1px solid #eee; text-align: center; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
-        .deal-badge { background: var(--secondary); color: black; padding: 5px; font-weight: 800; border-radius: 5px; font-size: 0.85em; margin-bottom: 10px; border: 1.5px solid #000; }
-        .product-name { font-size: 0.9em; font-weight: 600; color: #333; min-height: 40px; }
-        .price-val { color: var(--primary); font-size: 1.2em; font-weight: bold; display: block; margin-top: 10px; }
+        .promo-card { background: #fff; border: 1px solid #ccc; padding: 10px; text-align: center; border-radius: 8px; }
+        .badge { background: #ffcc00; padding: 5px; font-weight: bold; display: block; margin-bottom: 5px; }
     </style>
 </head>
 <body>
 
-<div class="nav-bar">
-    <a href="index.html">🏠 בית</a>
-    <a href="promos.html" class="active">🔥 דילים שווים</a>
-    <a href="contact.html">📞 צור קשר</a>
-    <a href="reviews.html">⭐ חוות דעת</a>
-</div>
-
-<div class="container">
-    <div class="promo-header"><h1>🔥 דילים שווים 🔥</h1></div>
-    <div id="promo-container" class="promo-grid">
-        <div style="text-align:center; grid-column: 1/-1; padding: 40px; color: #888;">סורק מוצרים במלאי...</div>
+    <div class="debug-box" id="debug-log">
+        <h3>סטטוס טעינה:</h3>
+        <p id="p-status">טוען קובץ מבצעים...</p>
+        <p id="s-status">טוען קובץ מלאי...</p>
     </div>
-</div>
+
+    <div id="promo-container" class="promo-grid"></div>
 
 <script>
-// פונקציה לתיקון ברקודים (כולל מדעיים)
-function cleanBC(val) {
+function toFullBarcode(val) {
     if (!val) return "";
     let s = val.toString().replace(/"/g, '').trim();
-    if (s.toLowerCase().includes('e+')) return BigInt(Math.round(Number(s))).toString();
+    if (s.toLowerCase().includes('e+')) {
+        // המרה של מספר מדעי למספר רגיל
+        return Number(s).toLocaleString('fullwide', {useGrouping:false});
+    }
     return s.replace(/\D/g, '');
 }
 
 async function loadDeals() {
+    const pStatus = document.getElementById('p-status');
+    const sStatus = document.getElementById('s-status');
+    const container = document.getElementById('promo-container');
+
     try {
-        const container = document.getElementById('promo-container');
-        
-        // 1. קריאת המבצעים
+        // 1. טעינת מבצעים
         const pRes = await fetch('stock_promos.csv?t=' + Date.now());
         const pText = await pRes.text();
         const pRows = pText.split(/\r?\n/);
@@ -57,56 +48,57 @@ async function loadDeals() {
         pRows.forEach(row => {
             const parts = row.split(',');
             if (parts.length >= 2) {
-                const bc = cleanBC(parts[0]);
+                const bc = toFullBarcode(parts[0]);
                 if(bc && bc !== "barcode") promos[bc] = parts[1].trim();
             }
         });
+        
+        const pCount = Object.keys(promos).length;
+        pStatus.innerHTML = `✅ קובץ מבצעים נטען. נמצאו ${pCount} ברקודים למבצע.`;
 
-        // 2. קריאת המלאי - בשיטה סלחנית
+        // 2. טעינת מלאי
         const sRes = await fetch('stock.csv?t=' + Date.now());
         const sText = await sRes.text();
         const sRows = sText.split(/\r?\n/);
-        
-        container.innerHTML = "";
+        sStatus.innerHTML = `✅ קובץ מלאי נטען. סורק ${sRows.length} שורות...`;
+
         let foundAny = false;
 
         sRows.forEach((row, idx) => {
-            if (idx === 0 || !row.trim()) return;
-
-            // פיצול לפי כל מפריד אפשרי (פסיק או נקודה-פסיק)
-            const cols = row.split(/[;,]/).map(c => c.replace(/"/g, '').trim());
+            if (idx === 0) return;
             
-            if (cols.length > 3) {
-                // אנחנו מחפשים ברקוד שמתאים למבצעים שלנו בכל אחד מהתאים הראשונים
-                // זה פותר בעיה אם הברקוד הוא בעמודה 1 או 2
-                let matchedBC = cols.find(c => promos[cleanBC(c)]);
+            // אנחנו בודקים כל מילה בשורה כדי לראות אם היא ברקוד מוכר
+            const words = row.split(/[;,]/);
+            words.forEach((word, colIdx) => {
+                const cleanWord = toFullBarcode(word);
                 
-                if (matchedBC) {
-                    const bc = cleanBC(matchedBC);
+                if (cleanWord && promos[cleanWord]) {
                     foundAny = true;
-                    // מחפש שם מוצר (התא הארוך ביותר בדרך כלל) ומחיר
-                    const name = cols[2] || "מוצר";
-                    const price = cols[6] || cols[7] || "0";
+                    // אם מצאנו ברקוד, ננסה לקחת את השם והמחיר מהעמודות הקרובות
+                    const name = words[2] || "מוצר";
+                    const price = words[6] || "0";
 
                     container.innerHTML += `
                         <div class="promo-card">
-                            <div class="deal-badge">${promos[bc]}</div>
-                            <div class="product-name">${name}</div>
-                            <div class="price-val">₪${price}</div>
+                            <span class="badge">${promos[cleanWord]}</span>
+                            <strong>${name.replace(/"/g, '')}</strong><br>
+                            <span>₪${price.replace(/"/g, '')}</span>
                         </div>`;
                 }
-            }
+            });
         });
 
         if (!foundAny) {
-            container.innerHTML = "<div style='grid-column:1/-1; text-align:center; padding:20px;'>לא נמצאו מוצרים תואמים. ודא שהברקודים ב-stock_promos.csv מופיעים גם ב-stock.csv.</div>";
+            sStatus.innerHTML += `<br>❌ לא נמצאה אף התאמה בין הברקודים במבצעים לבין המלאי.`;
+            sStatus.style.color = "red";
         }
 
     } catch (e) {
+        pStatus.innerHTML = "❌ שגיאה: ודא שהקבצים קיימים ב-GitHub באותה תיקייה.";
         console.error(e);
-        container.innerHTML = "שגיאה בטעינה.";
     }
 }
+
 window.onload = loadDeals;
 </script>
 </body>
