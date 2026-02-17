@@ -63,9 +63,37 @@
 </head>
 <body>
 
-<div class="cart-sticky-header" onclick="toggleCart()">
-    🛒 הסל שלי: <span id="cart-count">0</span> מוצרים | סה"כ: ₪<span id="cart-total-header">0</span>
-</div>
+// --- הקוד המעודכן לסרגל העגלה שלך ---
+
+function updateStickyHeader() {
+    // שליפת העגלה מהזיכרון (זה מה שדף המבצעים מעדכן)
+    const cart = JSON.parse(localStorage.getItem('cart')) || [];
+    
+    // עדכון המספר בתוך ה-Span שמצאנו בצילום מסך שלך
+    const countElement = document.getElementById('cart-count');
+    if (countElement) {
+        countElement.innerText = cart.length;
+    }
+}
+
+// פקודה להפעיל את העדכון מיד כשהדף נטען
+window.addEventListener('DOMContentLoaded', updateStickyHeader);
+
+// פונקציית ה-Toggle הקיימת שלך (נשארת אותו דבר)
+function toggleCart() {
+    const cartSection = document.getElementById('cart-section');
+    if (cartSection.style.display === 'none' || cartSection.style.display === '') {
+        cartSection.style.display = 'block';
+        displayCart(); // הפונקציה שלך שמציגה את הפריטים
+    } else {
+        cartSection.style.display = 'none';
+    }
+}
+
+// בדיקה אם הגענו מדף המבצעים וצריך לפתוח את העגלה אוטומטית
+if (window.location.search.includes('openCart=true')) {
+    window.addEventListener('load', toggleCart);
+}
 
 <div class="nav-bar" style="background: white; padding: 12px; display: flex; justify-content: center; gap: 15px; border-bottom: 1px solid #eee; position: sticky; top: 0; z-index: 1000;">
     <a href="index.html" style="text-decoration: none; color: #444; font-weight: 600;">🏠 בית</a>
@@ -215,4 +243,5 @@ window.onload = loadInventory;
 </script>
 </body>
 </html>
+
 
