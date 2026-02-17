@@ -41,7 +41,7 @@
 
         .modal { display: none; position: fixed; z-index: 3000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); }
         .modal-content { background: white; width: 90%; max-width: 450px; margin: 50px auto; border-radius: 20px; padding: 25px; text-align: right; }
-        .cart-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #eee; }
+        .cart-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #eee; }
     </style>
 </head>
 <body>
@@ -104,18 +104,14 @@
 let allProducts = [];
 let cart = [];
 
-// פונקציה שמחלצת מספר מטקסט כמו "3 ב-10" או "ב-20"
+// פונקציה חכמה לחילוץ מחיר
 function extractPrice(priceValue) {
     if (typeof priceValue === 'number') return priceValue;
-    
-    // אם יש את המילה "ב-", ניקח את מה שבא אחריה
     if (priceValue.includes('ב-')) {
         let parts = priceValue.split('ב-');
         let extracted = parseFloat(parts[1]);
         return isNaN(extracted) ? 0 : extracted;
     }
-    
-    // ניקוי כללי (הורדת ₪ ורווחים)
     let cleaned = parseFloat(String(priceValue).replace(/[^\d.]/g, ''));
     return isNaN(cleaned) ? 0 : cleaned;
 }
@@ -145,19 +141,23 @@ function updateUI() {
     const itemsHtml = cart.map((i, idx) => {
         let actualPrice = extractPrice(i.price);
         let qty = i.qty || 1;
+        let lineTotal = actualPrice * qty;
         
         count += qty;
-        total += (actualPrice * qty);
+        total += lineTotal;
 
         return `
             <div class="cart-item">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <button onclick="removeItem(${idx})" style="background:none; border:none; color:red; cursor:pointer; font-size: 1.5em;">×</button>
+                    <span style="font-weight: bold; color: var(--dark); min-width: 60px;">₪${lineTotal.toFixed(2)}</span>
+                </div>
                 <div style="text-align: right; flex-grow: 1;">
-                    <strong style="display: block;">${i.name}</strong>
+                    <strong style="display: block; font-size: 1.05em;">${i.name}</strong>
                     <div style="font-size: 0.85em; color: #666;">
                         ${i.price} (x${qty})
                     </div>
                 </div>
-                <button onclick="removeItem(${idx})" style="background:none; border:none; color:red; cursor:pointer; font-size: 1.5em; padding: 0 10px;">×</button>
             </div>
         `;
     }).join('');
@@ -170,11 +170,8 @@ function updateUI() {
 
 function addToCart(name, price) {
     const existing = cart.find(i => i.name === name);
-    if (existing) {
-        existing.qty++;
-    } else {
-        cart.push({ name, price, qty: 1 });
-    }
+    if (existing) { existing.qty++; } 
+    else { cart.push({ name, price, qty: 1 }); }
     localStorage.setItem('cart', JSON.stringify(cart));
     updateUI();
 }
@@ -212,7 +209,8 @@ function sendToWhatsApp() {
     if (cart.length === 0) return;
     let msg = "שלום Up סטוק, אני רוצה להזמין:\n\n";
     cart.forEach(i => {
-        msg += `• ${i.name} (x${i.qty || 1}) - ${i.price}\n`;
+        let linePrice = extractPrice(i.price) * (i.qty || 1);
+        msg += `• ${i.name} (x${i.qty || 1}) - ₪${linePrice.toFixed(2)}\n`;
     });
     msg += `\n*סה"כ לתשלום: ₪${document.getElementById('cart-total-modal').innerText}*`;
     window.open(`https://wa.me/972549397753?text=${encodeURIComponent(msg)}`);
