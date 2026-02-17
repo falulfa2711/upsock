@@ -2,46 +2,118 @@
 <html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>Up סטוק | דילים</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Up סטוק | דילים חמים</title>
     <style>
-        body { font-family: sans-serif; background: #f4f4f4; direction: rtl; text-align: center; }
-        .container { max-width: 800px; margin: 20px auto; padding: 20px; }
-        .promo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; }
-        .card { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border: 1px solid #ddd; }
-        .badge { background: #ffcc00; font-weight: bold; padding: 5px; border-radius: 4px; display: block; margin-bottom: 10px; }
-        .price { color: #ed1c24; font-size: 1.5em; font-weight: bold; }
+        :root { --primary: #ed1c24; --secondary: #ffcc00; --bg: #fdfdfd; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; margin: 0; background: var(--bg); direction: rtl; }
+        
+        .nav-bar { 
+            background: white; padding: 12px; display: flex; justify-content: center; 
+            gap: 15px; border-bottom: 1px solid #eee; position: sticky; top: 0; z-index: 1000;
+        }
+        .nav-bar a { text-decoration: none; color: #444; font-weight: 600; }
+        .nav-bar a.active { color: var(--primary); font-weight: 800; }
+
+        .container { max-width: 1000px; margin: 0 auto; padding: 20px; }
+        .promo-header { 
+            background: var(--primary); color: white; padding: 15px; 
+            text-align: center; border-radius: 12px; margin-bottom: 30px;
+            box-shadow: 0 4px 10px rgba(237, 28, 36, 0.2);
+        }
+        .promo-header h1 { margin: 0; font-size: 1.6em; }
+
+        .promo-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); 
+            gap: 20px; 
+        }
+
+        .promo-card { 
+            background: #fff; border-radius: 15px; padding: 20px; 
+            border: 2px solid #f0f0f0; text-align: center; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05); 
+            display: flex; flex-direction: column; justify-content: center;
+            transition: transform 0.2s;
+        }
+        .promo-card:hover { transform: translateY(-5px); border-color: var(--secondary); }
+
+        .deal-badge {
+            background: var(--secondary); color: #000; 
+            padding: 10px 5px; font-weight: 900; border-radius: 10px; 
+            font-size: 1.3em; margin-bottom: 15px; 
+            border: 2px solid #000;
+            box-shadow: 2px 2px 0px #000;
+        }
+        .product-name { 
+            font-size: 1.1em; font-weight: 600; color: #333; 
+            margin-bottom: 5px; line-height: 1.4;
+        }
+        .divider { 
+            width: 40px; height: 3px; background: var(--primary); 
+            margin: 10px auto; border-radius: 2px; 
+        }
     </style>
 </head>
 <body>
-    <h1>🔥 המבצעים שלנו 🔥</h1>
-    <div class="container">
-        <div id="promo-list" class="promo-grid">טוען...</div>
-    </div>
 
-    <script>
-    async function load() {
-        try {
-            const res = await fetch('stock_promos.csv?t=' + Date.now());
-            const text = await res.text();
-            const rows = text.split(/\r?\n/);
-            let html = '';
+<div class="nav-bar">
+    <a href="index.html">🏠 בית</a>
+    <a href="promos.html" class="active">🔥 דילים שווים</a>
+    <a href="contact.html">📞 צור קשר</a>
+</div>
+
+<div class="container">
+    <div class="promo-header">
+        <h1>🔥 המבצעים הכי חמים בסניף 🔥</h1>
+    </div>
+    <div id="promo-container" class="promo-grid">
+        <div style="grid-column: 1/-1; text-align: center; padding: 50px; color: #888;">טוען מבצעים...</div>
+    </div>
+</div>
+
+<script>
+async function loadDeals() {
+    try {
+        const response = await fetch('stock_promos.csv?t=' + Date.now());
+        const text = await response.text();
+        const rows = text.split(/\r?\n/);
+        
+        const container = document.getElementById('promo-container');
+        container.innerHTML = "";
+        
+        let found = false;
+
+        rows.forEach((row, index) => {
+            if (index === 0 || !row.trim()) return;
+
+            // פיצול לפי פסיקים
+            const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
             
-            rows.forEach((row, idx) => {
-                if (idx === 0 || !row.trim()) return;
-                const cols = row.split(',');
-                if (cols.length >= 3) {
-                    html += `
-                    <div class="card">
-                        <span class="badge">${cols[1]}</span>
-                        <h3>${cols[0]}</h3>
-                        <div class="price">₪${cols[2]}</div>
+            if (cols.length >= 2) {
+                const name = cols[0].replace(/"/g, '').trim();
+                const promoText = cols[1].replace(/"/g, '').trim();
+
+                found = true;
+                container.innerHTML += `
+                    <div class="promo-card">
+                        <div class="deal-badge">${promoText}</div>
+                        <div class="product-name">${name}</div>
+                        <div class="divider"></div>
                     </div>`;
-                }
-            });
-            document.getElementById('promo-list').innerHTML = html || "אין מבצעים כרגע";
-        } catch (e) { document.getElementById('promo-list').innerHTML = "שגיאה בטעינה"; }
+            }
+        });
+
+        if (!found) {
+            container.innerHTML = "<p style='grid-column:1/-1; text-align:center;'>המבצעים מתעדכנים, שווה לחזור בקרוב!</p>";
+        }
+
+    } catch (e) {
+        console.error(e);
+        document.getElementById('promo-container').innerHTML = "שגיאה בטעינת הנתונים.";
     }
-    window.onload = load;
-    </script>
+}
+window.onload = loadDeals;
+</script>
 </body>
 </html>
