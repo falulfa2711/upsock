@@ -3,12 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Up סטוק | דילים</title>
+    <title>Up סטוק | מבצעים</title>
     <style>
         :root { --primary: #ed1c24; --secondary: #ffcc00; }
-        body { font-family: system-ui, -apple-system, sans-serif; background: #fdfdfd; margin: 0; direction: rtl; }
+        body { font-family: system-ui, -apple-system, sans-serif; background: #fdfdfd; margin: 0; padding-top: 60px; direction: rtl; }
+        
+        /* סרגל עליון עם מונה עגלה */
+        .top-bar { 
+            position: fixed; top: 0; left: 0; right: 0; height: 60px; 
+            background: white; display: flex; align-items: center; 
+            justify-content: space-between; padding: 0 20px; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1); z-index: 1000;
+        }
+        .cart-status { background: var(--primary); color: white; padding: 5px 15px; border-radius: 20px; font-weight: bold; }
+
         .container { max-width: 1000px; margin: 20px auto; padding: 10px; }
-        .promo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; }
+        .promo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px; }
         
         .promo-card { 
             background: #fff; border-radius: 12px; padding: 15px; 
@@ -17,36 +27,53 @@
             display: flex; flex-direction: column; align-items: center;
         }
 
-        .product-img {
-            width: 100%; height: 140px; object-fit: contain;
-            margin-bottom: 12px; background: #f9f9f9; border-radius: 8px;
-        }
-
-        .no-img {
-            height: 140px; width: 100%; display: flex; align-items: center;
-            justify-content: center; background: #f0f0f0; color: #ccc;
-            border-radius: 8px; margin-bottom: 12px; font-size: 2em;
-        }
+        .product-img { width: 100%; height: 130px; object-fit: contain; margin-bottom: 12px; border-radius: 8px; }
+        .no-img { height: 130px; width: 100%; display: flex; align-items: center; justify-content: center; background: #f0f0f0; border-radius: 8px; margin-bottom: 12px; }
 
         .deal-badge {
-            background: var(--secondary); color: #000; padding: 8px 12px;
+            background: var(--secondary); color: #000; padding: 6px;
             font-weight: 800; border-radius: 6px; font-size: 1.1em;
-            margin-bottom: 10px; border: 1.5px solid #000; width: 85%;
+            margin-bottom: 8px; border: 1.5px solid #000; width: 90%;
         }
 
-        .product-name { font-size: 1.1em; font-weight: 700; color: #333; min-height: 40px; }
+        .product-name { font-size: 1em; font-weight: 600; color: #333; margin-bottom: 12px; min-height: 40px; }
+
+        .add-btn {
+            background: var(--primary); color: white; border: none;
+            padding: 10px 15px; border-radius: 20px; cursor: pointer;
+            font-weight: bold; width: 100%; transition: 0.2s;
+        }
+        .add-btn:active { transform: scale(0.95); }
     </style>
 </head>
 <body>
+
+<div class="top-bar">
+    <div style="font-weight: 900; color: var(--primary); font-size: 1.4em;">Up סטוק</div>
+    <div class="cart-status">עגלה: <span id="cart-count">0</span> פריטים</div>
+</div>
 
 <div class="container">
     <div id="promo-container" class="promo-grid">טוען מבצעים...</div>
 </div>
 
 <script>
+// פונקציה לעדכון המונה בראש הדף
+function updateCartUI() {
+    let cart = JSON.parse(localStorage.getItem('cart')) || [];
+    document.getElementById('cart-count').innerText = cart.length;
+}
+
+// פונקציית הוספה לסל
+function addToCart(name, promo) {
+    let cart = JSON.parse(localStorage.getItem('cart')) || [];
+    cart.push({ name: name, price: promo }); // המבצע נשמר כ"מחיר" של היחידה
+    localStorage.setItem('cart', JSON.stringify(cart));
+    updateCartUI();
+}
+
 async function loadDeals() {
     try {
-        // טעינת הקובץ עם מנגנון למניעת שמירה במטמון (Cache)
         const response = await fetch('stock_promos.csv?t=' + Date.now());
         const text = await response.text();
         const rows = text.split(/\r?\n/);
@@ -55,7 +82,6 @@ async function loadDeals() {
         
         rows.forEach((row, index) => {
             if (index === 0 || !row.trim()) return;
-            
             const cols = row.split(',');
             
             if (cols.length >= 2) {
@@ -63,23 +89,26 @@ async function loadDeals() {
                 const promo = cols[1].trim();
                 const imagePath = cols[2] ? cols[2].trim() : "";
 
-                // יצירת תגית התמונה - אם אין תמונה יוצג אייקון
-                let imgHtml = imagePath ? `<img src="${imagePath}" class="product-img" onerror="this.parentElement.innerHTML='<div class=\'no-img\'>📷</div>' + this.parentElement.innerHTML; this.remove();">` : `<div class="no-img">📷</div>`;
+                let imgHtml = imagePath ? 
+                    `<img src="${imagePath}" class="product-img" onerror="this.parentElement.innerHTML='<div class=\'no-img\'>📷</div>' + this.parentElement.innerHTML; this.remove();">` : 
+                    `<div class="no-img">📷</div>`;
 
                 container.innerHTML += `
                     <div class="promo-card">
                         ${imgHtml}
                         <div class="deal-badge">${promo}</div>
                         <div class="product-name">${name}</div>
+                        <button class="add-btn" onclick="addToCart('${name}', '${promo}')">🛒 הוספה לסל</button>
                     </div>`;
             }
         });
-    } catch (e) { 
-        console.error(e);
-        document.getElementById('promo-container').innerHTML = "שגיאה בטעינת הנתונים.";
-    }
+    } catch (e) { console.error(e); }
 }
-window.onload = loadDeals;
+
+window.onload = () => {
+    loadDeals();
+    updateCartUI();
+};
 </script>
 </body>
 </html>
