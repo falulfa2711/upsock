@@ -16,7 +16,7 @@
         .promo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
         .promo-card { background: #fff; border-radius: 10px; padding: 12px; border: 1px solid #eee; text-align: center; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
         .deal-badge { background: var(--secondary); color: black; padding: 5px; font-weight: 800; border-radius: 5px; font-size: 0.85em; margin-bottom: 10px; border: 1.5px solid #000; }
-        .product-name { font-size: 0.95em; font-weight: 600; color: #333; min-height: 40px; }
+        .product-name { font-size: 0.95em; font-weight: 600; color: #333; min-height: 40px; margin-bottom: 5px; }
         .price-section { margin-top: auto; padding-top: 8px; border-top: 1px dashed #ddd; }
         .price-val { color: var(--primary); font-size: 1.2em; font-weight: bold; }
     </style>
@@ -38,21 +38,23 @@
 </div>
 
 <script>
-// פונקציה שהופכת מספר מדעי (7.29E+12) לברקוד רגיל
-function fixScientific(val) {
+// פונקציית הקסם שהופכת את ה-E+12 חזרה למספר ברקוד רגיל
+function formatBarcode(val) {
     if (!val) return "";
-    let n = val.toString().replace(/"/g, '').trim();
-    if (n.includes('E+') || n.includes('e+')) {
-        return Number(n).toLocaleString('fullwide', {useGrouping:false});
+    let clean = val.toString().replace(/"/g, '').trim();
+    // אם זה מספר מדעי (כמו שראינו בצילום מסך)
+    if (clean.toLowerCase().includes('e+')) {
+        return BigInt(Math.round(Number(clean))).toString();
     }
-    return n.replace(/\D/g, '');
+    // אם זה מספר רגיל, רק מנקים תווים מיותרים
+    return clean.replace(/\D/g, '');
 }
 
 async function loadDeals() {
     try {
         const container = document.getElementById('promo-container');
         
-        // 1. טעינת המבצעים
+        // 1. טעינת קובץ המבצעים
         const pRes = await fetch('stock_promos.csv?t=' + Date.now());
         const pText = await pRes.text();
         const pRows = pText.split(/\r?\n/);
@@ -63,51 +65,51 @@ async function loadDeals() {
             if (parts.length >= 2) {
                 const bc = parts[0].replace(/\D/g, '').trim();
                 const text = parts[1].trim();
-                if(bc) promos[bc] = text;
+                if(bc && bc !== "barcode") promos[bc] = text;
             }
         });
 
-        // 2. טעינת המלאי
+        // 2. טעינת קובץ המלאי
         const sRes = await fetch('stock.csv?t=' + Date.now());
         const sText = await sRes.text();
-        
-        // פיצול שורות תוך התחשבות בגרשיים (CSV מורכב)
         const sRows = sText.match(/[^\r\n]+/g) || [];
+        
         container.innerHTML = "";
         let foundAny = false;
 
         sRows.forEach((row, index) => {
-            if (index === 0) return; // דילוג על כותרת
+            if (index === 0) return; // דילוג על כותרת המלאי
             
-            // פיצול לפי פסיק, אבל מתעלם מפסיקים בתוך גרשיים
+            // פיצול חכם שמתעלם מפסיקים בתוך גרשיים
             const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
             
             if (cols.length > 5) {
                 const rawBarcode = cols[1] || "";
-                const cleanBarcode = fixScientific(rawBarcode); // תיקון ה-E+12
-                const name = (cols[2] || "").replace(/"/g, '').trim();
-                const price = (cols[6] || "").replace(/"/g, '').trim();
+                const cleanBarcode = formatBarcode(rawBarcode); // כאן קורה התיקון לברקוד הארוך
+                const name = (cols[2] || "מוצר").replace(/"/g, '').trim();
+                const price = (cols[6] || "0").replace(/"/g, '').trim();
 
-                // בדיקה אם הברקוד (המתוקן) נמצא במבצעים
                 if (cleanBarcode && promos[cleanBarcode]) {
                     foundAny = true;
                     container.innerHTML += `
                         <div class="promo-card">
                             <div class="deal-badge">${promos[cleanBarcode]}</div>
                             <div class="product-name">${name}</div>
-                            <div class="price-section"><span class="price-val">₪${price}</span></div>
+                            <div class="price-section">
+                                <span class="price-val">₪${price}</span>
+                            </div>
                         </div>`;
                 }
             }
         });
 
         if (!foundAny) {
-            container.innerHTML = "<p style='grid-column:1/-1; text-align:center;'>המבצעים נטענו, אך לא נמצאה התאמה לברקודים במלאי. ודא שהברקודים ב-CSV תואמים.</p>";
+            container.innerHTML = "<p style='grid-column:1/-1; text-align:center;'>המבצעים נטענו, אך לא נמצאה התאמה לברקודים במלאי. נסה לרענן.</p>";
         }
 
     } catch (e) {
         console.error(e);
-        container.innerHTML = "שגיאה בטעינה.";
+        container.innerHTML = "שגיאה בטעינת הנתונים.";
     }
 }
 window.onload = loadDeals;
