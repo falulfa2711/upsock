@@ -3,20 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Up סטוק | דילים חווים</title>
+    <title>Up סטוק | דילים שווים</title>
     <style>
         :root { --primary: #ed1c24; --secondary: #ffcc00; --bg: #fdfdfd; }
         body { font-family: 'Segoe UI', Tahoma, sans-serif; margin: 0; background: var(--bg); direction: rtl; }
-        .nav-bar { background: white; padding: 12px; display: flex; justify-content: center; gap: 15px; border-bottom: 1px solid #eee; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        
+        /* סרגל ניווט */
+        .nav-bar { 
+            background: white; padding: 12px; display: flex; justify-content: center; 
+            gap: 15px; border-bottom: 1px solid #eee; position: sticky; top: 0; z-index: 1000;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
         .nav-bar a { text-decoration: none; color: #444; font-weight: 600; font-size: 0.95em; }
         .nav-bar a.active { color: var(--primary); font-weight: 800; }
+
         .container { max-width: 900px; margin: 0 auto; padding: 15px; }
-        .promo-header { background: var(--primary); color: white; padding: 12px; text-align: center; border-radius: 8px; margin-bottom: 20px; }
+        .promo-header { 
+            background: var(--primary); color: white; padding: 12px; 
+            text-align: center; border-radius: 8px; margin-bottom: 20px;
+        }
+        .promo-header h1 { margin: 0; font-size: 1.4em; }
+
         .promo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 15px; }
-        .promo-card { background: #fff; border-radius: 10px; padding: 15px; border: 1px solid #eee; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.05); display: flex; flex-direction: column; justify-content: space-between; }
-        .deal-badge { background: var(--secondary); color: black; padding: 6px; font-weight: 800; border-radius: 5px; font-size: 0.9em; margin-bottom: 10px; border: 1.5px solid #000; }
+        .promo-card { 
+            background: #fff; border-radius: 10px; padding: 15px; border: 1px solid #eee; 
+            text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.05); 
+            display: flex; flex-direction: column; justify-content: space-between;
+        }
+        .deal-badge {
+            background: var(--secondary); color: black; padding: 6px;
+            font-weight: 800; border-radius: 5px; font-size: 0.9em;
+            margin-bottom: 10px; border: 1.5px solid #000;
+        }
         .product-name { font-size: 0.95em; font-weight: 600; color: #333; min-height: 45px; margin-bottom: 10px; }
         .price-val { color: var(--primary); font-size: 1.3em; font-weight: bold; }
+        .unit-label { font-size: 0.7em; color: #999; display: block; }
     </style>
 </head>
 <body>
@@ -29,16 +50,18 @@
 </div>
 
 <div class="container">
-    <div class="promo-header"><h1>🔥 מבצעים חמים במלאי 🔥</h1></div>
+    <div class="promo-header">
+        <h1>🔥 מבצעים חמים במלאי 🔥</h1>
+    </div>
     <div id="promo-container" class="promo-grid">
-        <div style="grid-column: 1/-1; text-align: center; padding: 50px;">מעבד נתונים...</div>
+        <div style="grid-column: 1/-1; text-align: center; padding: 50px; color: #888;">טוען מבצעים...</div>
     </div>
 </div>
 
 <script>
 async function loadDeals() {
     try {
-        // 1. טעינת מבצעים
+        // 1. טעינת רשימת מילות המפתח למבצעים
         const pRes = await fetch('stock_promos.csv?t=' + Date.now());
         const pText = await pRes.text();
         const pRows = pText.split(/\r?\n/);
@@ -47,14 +70,15 @@ async function loadDeals() {
         pRows.forEach(row => {
             const parts = row.split(',');
             if (parts.length >= 2) {
-                const bc = parts[0].replace(/\D/g, '').trim();
-                if(bc && bc !== "barcode") {
-                    promosList.push({ barcode: bc, text: parts[1].trim() });
-                }
+                // אנחנו שומרים את מה שכתוב בעמודה הראשונה (מילה או ברקוד) ואת המבצע
+                promosList.push({ 
+                    key: parts[0].trim().replace(/"/g, ''), 
+                    text: parts[1].trim().replace(/"/g, '') 
+                });
             }
         });
 
-        // 2. טעינת מלאי
+        // 2. טעינת המלאי הראשי
         const sRes = await fetch('stock.csv?t=' + Date.now());
         const sText = await sRes.text();
         const sRows = sText.split(/\r?\n/);
@@ -62,25 +86,23 @@ async function loadDeals() {
         const container = document.getElementById('promo-container');
         container.innerHTML = "";
         let foundAny = false;
-
-        // רשימת הברקודים שכבר הצגנו (למניעת כפילויות)
-        let displayed = new Set();
+        let displayedNames = new Set(); // למניעת כפילויות
 
         sRows.forEach((row, idx) => {
             if (idx === 0 || !row.trim()) return;
 
-            // בדיקה עבור כל מבצע ברשימה שלנו
+            // בדיקה מול כל מבצע ברשימה
             promosList.forEach(promo => {
-                // אם הברקוד מופיע בשורה הזו (גם אם הוא בפורמט מדעי, החלק המרכזי שלו יופיע)
-                // או אם הברקוד מופיע בטור השני
-                if (row.includes(promo.barcode) || row.includes(promo.barcode.substring(0, 10))) {
-                    if (!displayed.has(promo.barcode)) {
-                        const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
-                        const name = (cols[2] || "מוצר").replace(/"/g, '').trim();
-                        const price = (cols[6] || "0").replace(/"/g, '').trim();
+                // אם המילה או הברקוד מופיעים בשורה של המלאי
+                if (promo.key && row.includes(promo.key)) {
+                    const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+                    const name = (cols[2] || "").replace(/"/g, '').trim();
+                    const price = (cols[6] || "0").replace(/"/g, '').trim();
 
+                    // מציג רק אם לא הצגנו את המוצר הספציפי הזה כבר
+                    if (name && !displayedNames.has(name)) {
                         foundAny = true;
-                        displayed.add(promo.barcode);
+                        displayedNames.add(name);
                         
                         container.innerHTML += `
                             <div class="promo-card">
@@ -88,7 +110,10 @@ async function loadDeals() {
                                     <div class="deal-badge">${promo.text}</div>
                                     <div class="product-name">${name}</div>
                                 </div>
-                                <div class="price-val">₪${price}</div>
+                                <div class="price-section">
+                                    <span class="price-val">₪${price}</span>
+                                    <span class="unit-label">ליחידה</span>
+                                </div>
                             </div>`;
                     }
                 }
@@ -96,14 +121,15 @@ async function loadDeals() {
         });
 
         if (!foundAny) {
-            container.innerHTML = "<p style='grid-column:1/-1; text-align:center;'>לא נמצאו מוצרים תואמים במלאי כרגע.</p>";
+            container.innerHTML = "<p style='grid-column:1/-1; text-align:center;'>לא נמצאו מוצרים תואמים במלאי.</p>";
         }
 
     } catch (e) {
-        console.error(e);
-        document.getElementById('promo-container').innerHTML = "שגיאה בטעינת הקבצים.";
+        console.error("Error:", e);
+        document.getElementById('promo-container').innerHTML = "שגיאה בטעינת הנתונים.";
     }
 }
+
 window.onload = loadDeals;
 </script>
 </body>
