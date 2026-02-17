@@ -2,7 +2,7 @@ name,promo,image
 מגבונים לחים אוונט,מבצע 4 ב-10,images/wipes.jpg
 כוסות שתייה חמה 50 יח,מבצע 3 ב-10,images/hot_cups.jpg
 סנו סושי נייר מגבת,מבצע 2 ב-22,images/towel.jpg
-כוסות שתייה קרה 100 יח,מבצע 3 ב-12,images/cold_cups.jpg
+כוסות שתייה קרה 100 יח,מבצע 3 ב-12,images/coldcups.jpg
 מטליות מיקרופייבר 5 יח,מבצע 2 ב-10,images/small_cloths.jpg
 מטליות מיקרופייבר לרצפה 3 יח,מבצע 2 ב-20,images/floor_cloths.jpg
 עוגיות סנדוויץ,מבצע 2 ב-30,images/cookies.jpg
@@ -10,4 +10,5 @@ name,promo,image
 מרקייה קסרול אובלי 20 יח,מבצע 8 ב-10,images/oval_bowl.jpg
 מרקייה קסרול עגולה 20 יח,מבצע 8 ב-10,images/round_bowl.jpg
 שקיות אשפה,מבצע 3 ב-10,images/bags.jpg
+
 
