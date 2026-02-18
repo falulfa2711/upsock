@@ -3,85 +3,107 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>מבצעים - חנות תבניות אלומיניום</title>
+    <title>מבצעים - Up סטוק</title>
     <style>
         :root {
             --primary: #ed1c24;
             --dark: #333;
             --light: #f4f4f4;
+            --success: #2ecc71;
         }
-        body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--light); margin: 0; padding: 20px; text-align: center; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--light); margin: 0; padding: 0; text-align: center; }
         
-        h1 { color: var(--dark); }
+        /* תפריט ניווט עליון */
+        .nav-bar { background: white; padding: 15px; display: flex; justify-content: center; gap: 30px; border-bottom: 1px solid #eee; }
+        .nav-bar a { text-decoration: none; color: var(--dark); font-weight: 600; }
 
-        /* עיצוב הגריד של המוצרים */
+        h1 { color: var(--dark); margin-top: 30px; }
+
+        /* כפתור עגלה צף */
+        .floating-cart {
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            background: var(--primary);
+            color: white;
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            cursor: pointer;
+            z-index: 4000;
+            text-decoration: none;
+            transition: transform 0.2s;
+        }
+        .floating-cart:hover { transform: scale(1.1); }
+        .cart-badge {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: var(--dark);
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            font-size: 0.8em;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 2px solid white;
+        }
+
+        /* גריד מוצרים */
         .products-container {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
             gap: 20px;
             max-width: 1200px;
-            margin: 0 auto;
+            margin: 20px auto;
+            padding: 20px;
         }
 
         .product-card {
-            background: white;
-            border-radius: 12px;
-            padding: 15px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            transition: transform 0.2s;
+            background: white; border-radius: 12px; padding: 15px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1); transition: 0.2s;
+            display: flex; flex-direction: column; justify-content: space-between;
         }
         .product-card:hover { transform: translateY(-5px); }
 
-        .product-card img {
-            width: 100%;
-            height: 180px;
-            object-fit: contain;
-            border-radius: 8px;
-            cursor: pointer; /* מראה שאפשר ללחוץ */
-        }
-
+        .product-card img { width: 100%; height: 180px; object-fit: contain; border-radius: 8px; cursor: pointer; }
         .product-card h4 { margin: 10px 0 5px; font-size: 1.1em; color: var(--dark); height: 2.4em; overflow: hidden; }
         .price { color: var(--primary); font-weight: bold; font-size: 1.2em; margin-bottom: 10px; }
         
         .add-btn {
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 5px;
-            cursor: pointer;
-            width: 100%;
-            font-weight: bold;
+            background: var(--primary); color: white; border: none;
+            padding: 12px; border-radius: 8px; cursor: pointer;
+            width: 100%; font-weight: bold; transition: 0.3s;
         }
 
-        /* עיצוב המודל (הגדלת תמונה) */
+        /* מודאל הגדלת תמונה */
         .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: rgba(0,0,0,0.85);
-            justify-content: center;
-            align-items: center;
+            display: none; position: fixed; z-index: 5000;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9); justify-content: center; align-items: center;
         }
-        .modal-content {
-            max-width: 90%;
-            max-height: 80%;
-            border-radius: 10px;
-            box-shadow: 0 0 20px rgba(255,255,255,0.2);
-        }
-        .close-modal {
-            position: absolute;
-            top: 20px; right: 30px;
-            color: white;
-            font-size: 40px;
-            font-weight: bold;
-            cursor: pointer;
-        }
+        .modal-content { max-width: 90%; max-height: 85%; border-radius: 10px; border: 3px solid white; }
+        .close-modal { position: absolute; top: 20px; right: 30px; color: white; font-size: 50px; cursor: pointer; }
     </style>
 </head>
 <body>
+
+    <a href="index.html?openCart=true" class="floating-cart" title="עבור לסל הקניות">
+        <span style="font-size: 30px;">🛒</span>
+        <span id="cart-count" class="cart-badge">0</span>
+    </a>
+
+    <div class="nav-bar">
+        <a href="index.html">🏠 בית</a>
+        <a href="promos.html" style="color: #ed1c24; font-weight: 800;">🔥 דילים שווים</a>
+        <a href="contact.html">📞 צור קשר</a>
+    </div>
 
     <h1>מבצעי החנות</h1>
     <div id="promos-container" class="products-container">
@@ -93,17 +115,26 @@
     </div>
 
     <script>
+        let cart = JSON.parse(localStorage.getItem('cart')) || [];
+
+        // עדכון התצוגה של הכפתור הצף
+        function updateCartBadge() {
+            let count = 0;
+            cart.forEach(item => count += (item.qty || 1));
+            document.getElementById('cart-count').innerText = count;
+        }
+
+        // טעינת המבצעים מהקובץ
         async function loadPromos() {
             try {
-                const response = await fetch('stock_promos.csv');
+                const response = await fetch('stock_promos.csv?t=' + Date.now());
                 const data = await response.text();
-                const rows = data.split('\n').slice(1); // דילוג על הכותרת
+                const rows = data.split('\n').slice(1);
                 const container = document.getElementById('promos-container');
+                container.innerHTML = ""; // ניקוי לפני טעינה
                 
                 rows.forEach(row => {
                     if (!row.trim()) return;
-                    
-                    // פיצול לפי פסיק (המבנה: שם, מבצע, תמונה)
                     const cols = row.split(',');
                     if (cols.length >= 3) {
                         const name = cols[0].trim();
@@ -112,36 +143,63 @@
 
                         container.innerHTML += `
                             <div class="product-card">
-                                <img src="${imgSrc}" 
-                                     alt="${name}" 
-                                     onclick="openModal('${imgSrc}')"
-                                     onerror="this.src='images/placeholder.jpg'">
+                                <img src="${imgSrc}" onclick="openModal('${imgSrc}')" onerror="this.src='images/placeholder.jpg'">
                                 <h4>${name}</h4>
                                 <div class="price">${promo}</div>
-                                <button class="add-btn">הוסף לסל +</button>
+                                <button class="add-btn" onclick="addToCart('${name.replace(/'/g, "\\'")}', '${promo}')">הוסף לסל +</button>
                             </div>
                         `;
                     }
                 });
             } catch (error) {
-                console.error("Error loading CSV:", error);
+                console.error("שגיאה בטעינת המבצעים:", error);
             }
         }
 
-        // פונקציות המודל
+        // פונקציית הוספה לסל
+        function addToCart(name, price) {
+            // טעינה מחדש מהזיכרון ליתר ביטחון
+            cart = JSON.parse(localStorage.getItem('cart')) || [];
+            
+            const existing = cart.find(i => i.name === name);
+            if (existing) {
+                existing.qty++;
+            } else {
+                cart.push({ name: name, price: price, qty: 1 });
+            }
+            
+            // שמירה
+            localStorage.setItem('cart', JSON.stringify(cart));
+            
+            // עדכון הכפתור הצף מיד
+            updateCartBadge();
+            
+            // משוב ויזואלי על הכפתור
+            const btn = event.target;
+            const originalText = btn.innerText;
+            btn.innerText = "נוסף לסל ✓";
+            btn.style.background = "var(--success)";
+            setTimeout(() => {
+                btn.innerText = originalText;
+                btn.style.background = "var(--primary)";
+            }, 800);
+        }
+
+        // הגדלת תמונה
         function openModal(src) {
-            const modal = document.getElementById('imageModal');
-            const modalImg = document.getElementById('imgFull');
-            modal.style.display = "flex";
-            modalImg.src = src;
+            document.getElementById('imageModal').style.display = "flex";
+            document.getElementById('imgFull').src = src;
         }
 
         function closeModal() {
             document.getElementById('imageModal').style.display = "none";
         }
 
-        // טעינה ראשונית
-        window.onload = loadPromos;
+        // הפעלה בטעינה
+        window.onload = function() {
+            loadPromos();
+            updateCartBadge();
+        };
     </script>
 </body>
 </html>
