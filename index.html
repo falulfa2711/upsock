@@ -33,7 +33,6 @@
         
         .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; margin-top: 30px; }
         
-        /* --- העיצוב החדש לכרטיס המוצר והתמונה --- */
         .product-card { 
             background: white; 
             border-radius: 15px; 
@@ -54,12 +53,11 @@
             background: #fff;
             border-radius: 10px;
             margin-bottom: 12px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.06); /* הצל שדיברנו עליו */
+            box-shadow: 0 4px 10px rgba(0,0,0,0.06);
             transition: 0.3s;
         }
 
         .product-card img:hover { transform: scale(1.05); }
-
         .product-card .price { font-size: 1.5em; color: var(--primary); font-weight: bold; margin: 10px 0; }
         .add-btn { background: var(--dark); color: white; border: none; width: 100%; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: bold; }
 
@@ -107,28 +105,28 @@
     </div>
 
     <h2 style="text-align:right; border-right: 5px solid var(--primary); padding-right: 15px;">החנות שלנו</h2>
-   
+    
+    <div class="shop-gallery">
+        <img src="images/shop1.jpg"> <img src="images/shop2.jpg">
+        <img src="images/shop3.jpg"> <img src="images/shop4.jpg">
+        <img src="images/shop5.jpg"> <img src="images/shop6.jpg">
+        <img src="images/shop7.jpg"> <img src="images/shop8.jpg">
+        <img src="images/shop9.jpg"> <img src="images/shop10.jpg">
+        <img src="images/shop11.jpg">
+        <img src="images/shop12.jpg">
+        <img src="images/shop13.jpg">
+        <img src="images/shop14.jpg">
+        <img src="images/shop15.jpg">
+        <img src="images/shop16.jpg">
+        <img src="images/shop17.jpg">
+    </div>
 </div>
 
 <div id="cartModal" class="modal">
     <div class="modal-content">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
             <h2 style="margin:0;">הסל שלי 🛍️</h2>
-           <div class="shop-gallery">
-    <img src="images/shop1.jpg"> <img src="images/shop2.jpg">
-    <img src="images/shop3.jpg"> <img src="images/shop4.jpg">
-    <img src="images/shop5.jpg"> <img src="images/shop6.jpg">
-    <img src="images/shop7.jpg"> <img src="images/shop8.jpg">
-    <img src="images/shop9.jpg"> <img src="images/shop10.jpg">
-    <img src="images/shop11.jpg">
-    
-    <img src="images/shop12.jpg">
-    <img src="images/shop13.jpg">
-    <img src="images/shop14.jpg">
-    <img src="images/shop15.jpg">
-    <img src="images/shop16.jpg">
-    <img src="images/shop17.jpg">
-</div> <button class="clear-cart-btn" onclick="clearCart()">🗑️ ריקון סל</button>
+            <button class="clear-cart-btn" onclick="clearCart()">🗑️ ריקון סל</button>
         </div>
         <div id="cart-items-list" style="max-height: 350px; overflow-y: auto; margin-bottom: 15px;"></div>
         <div style="display: flex; justify-content: space-between; font-size: 1.5em; font-weight: bold; border-top: 2px solid #eee; padding-top: 20px;">
@@ -230,7 +228,6 @@ function clearCart() {
     }
 }
 
-// --- פונקציית החיפוש המעודכנת שמושכת תמונות ---
 function filterProducts() {
     const q = document.getElementById('productSearch').value.toLowerCase().trim();
     const container = document.getElementById('dynamic-products');
@@ -239,7 +236,6 @@ function filterProducts() {
     const filtered = allProducts.filter(p => p.name.toLowerCase().includes(q));
     
     container.innerHTML = filtered.map(p => {
-        // הנחה: התמונות שלך נמצאות בתיקיית images/products/ ושמן זהה לשם המוצר
         const imgSrc = `images/products/${p.name}.jpg`; 
 
         return `
@@ -279,4 +275,3 @@ window.onload = function() {
 </script>
 </body>
 </html>
-
