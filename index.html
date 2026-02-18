@@ -246,7 +246,7 @@ function filterProducts() {
         const pName = p.name.toLowerCase();
         
         // מנקה סיומות מהחיפוש ומשם המוצר כדי להשוות שורשים
-        // זה ינקה: ים, ות, י, ה (למשל: קנקנים -> קנקנ, קנקן -> קנקן)
+        // זה ינקה: ים, ות, י, ה
         const cleanQ = q.replace(/(ים|ות|י|ה)$/, "");
         const cleanP = pName.replace(/(ים|ות|י|ה)$/, "");
 
@@ -265,7 +265,6 @@ function filterProducts() {
         </div>
     `).join('');
 }
-    
     // מעדכן כמה מוצרים נמצאו בתוך הפונקציה
     if (status) {
         status.innerText = `נמצאו ${filtered.length} מוצרים:`;
@@ -296,6 +295,7 @@ window.onload = function() {
 </script>
 </body>
 </html>
+
 
 
 
