@@ -235,20 +235,28 @@ function filterProducts() {
     const q = document.getElementById('productSearch').value.toLowerCase().trim();
     const container = document.getElementById('dynamic-products');
     const status = document.getElementById('search-status');
-    if (!q) { container.innerHTML = ""; status.innerText = "הקלידו כדי לחפש מוצרים במלאי"; return; }
-  const filtered = allProducts.filter(p => {
-        const productName = p.name.toLowerCase();
-        const searchTerm = q.toLowerCase();
-        
-        // מנקה "ים" או "ות" מסוף המילה כדי למצוא גם יחיד וגם רבים
-        const cleanSearch = searchTerm.replace(/ים$|ות$/, "");
-
-        return productName.includes(cleanSearch);
-    });
     
+    if (!q) { container.innerHTML = ""; status.innerText = "הקלידו כדי לחפש מוצרים במלאי"; return; }
+
+    const filtered = allProducts.filter(p => {
+        const productName = p.name.toLowerCase();
+        // האלגוריתם שמוריד אות אחרונה כדי לתפוס גם "בלון" וגם "בלונים"
+        const searchTermRoot = q.length > 3 ? q.substring(0, q.length - 1) : q;
+        return productName.includes(searchTermRoot) || q.includes(productName);
+    });
+
     container.innerHTML = filtered.map(p => {
-        const imgSrc = `images/products/${p.name}.jpg`; 
+        const imgSrc = `images/products/${p.name}.jpg`;
         return `
+        <div class="product-card">
+            <img src="${imgSrc}" alt="${p.name}" loading="lazy" onerror="this.onerror=null; this.src='images/logo.jpg'">
+            <div style="font-size: 0.8em; color: var(--success); font-weight: bold;">מלאי: ${Math.floor(p.stock)}</div>
+            <h4 style="height: 40px; overflow: hidden; margin: 10px 0;">${p.name}</h4>
+            <div class="price">₪${p.price.toFixed(2)}</div>
+            <button class="add-btn" onclick="addToCart('${p.name.replace(/'/g, "\\'")}', ${p.price})">הוסף לסל +</button>
+        </div>`;
+    }).join('');
+}`
         <div class="product-card">
             <img src="${imgSrc}" alt="${p.name}" loading="lazy" onerror="this.onerror=null; this.src='images/logo.jpg'">
             <div style="font-size: 0.8em; color: var(--success); font-weight: bold;">מלאי: ${Math.floor(p.stock)}</div>
@@ -284,6 +292,7 @@ window.onload = function() {
 </script>
 </body>
 </html>
+
 
 
 
