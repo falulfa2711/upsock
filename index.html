@@ -236,7 +236,7 @@ function filterProducts() {
     const container = document.getElementById('dynamic-products');
     const status = document.getElementById('search-status');
     if (!q) { container.innerHTML = ""; status.innerText = "הקלידו כדי לחפש מוצרים במלאי"; return; }
-    const filtered = allProducts.filter(p => p.name.toLowerCase().includes(q));
+   const filtered = allProducts.filter(p => p.name.toLowerCase().includes(q) || q.includes(p.name.toLowerCase()));
     
     container.innerHTML = filtered.map(p => {
         const imgSrc = `images/products/${p.name}.jpg`; 
@@ -276,4 +276,5 @@ window.onload = function() {
 </script>
 </body>
 </html>
+
 
