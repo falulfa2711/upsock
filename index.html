@@ -242,7 +242,7 @@ function filterProducts() {
         const imgSrc = `images/products/${p.name}.jpg`; 
         return `
         <div class="product-card">
-            <img src="${imgSrc}" alt="${p.name}" loading="lazy" onerror="this.onerror=null; this.src='images/placeholder.jpg'">
+            <img src="${imgSrc}" alt="${p.name}" loading="lazy" onerror="this.onerror=null; this.src='images/logo.jpg'">
             <div style="font-size: 0.8em; color: var(--success); font-weight: bold;">מלאי: ${Math.floor(p.stock)}</div>
             <h4 style="height: 40px; overflow: hidden; margin: 10px 0;">${p.name}</h4>
             <div class="price">₪${p.price.toFixed(2)}</div>
@@ -276,3 +276,4 @@ window.onload = function() {
 </script>
 </body>
 </html>
+
