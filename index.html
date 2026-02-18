@@ -234,23 +234,28 @@ function clearCart() {
 function filterProducts() {
     const q = document.getElementById('productSearch').value.toLowerCase().trim();
     const container = document.getElementById('dynamic-products');
+    const status = document.getElementById('search-status');
     
-    // אם החיפוש ריק או קצר מדי - מנקים את המסך
     if (!q || q.length < 2) { 
         container.innerHTML = ""; 
+        if(status) status.innerText = "";
         return; 
     }
     
     const filtered = allProducts.filter(p => {
         const pName = p.name.toLowerCase();
-        // מנקה מהחיפוש סיומות של רבים (ים, ות) כדי להגיע לשורש
-        const cleanSearch = q.replace(/ים$|ות$/, "");
         
-        // בדיקה: האם השורש נמצא בשם המוצר או ששם המוצר נמצא בתוך החיפוש
-        return pName.includes(cleanSearch) || cleanSearch.includes(pName);
+        // מנקה סיומות מהחיפוש ומשם המוצר כדי להשוות שורשים
+        // זה ינקה: ים, ות, י, ה (למשל: קנקנים -> קנקנ, קנקן -> קנקן)
+        const cleanQ = q.replace(/(ים|ות|י|ה)$/, "");
+        const cleanP = pName.replace(/(ים|ות|י|ה)$/, "");
+
+        // בדיקה משולשת: האם אחד מכיל את השני או השורשים זהים
+        return pName.includes(cleanQ) || q.includes(cleanP) || cleanP.includes(cleanQ);
     });
 
-    // הצגת התוצאות
+    if(status) status.innerText = `נמצאו ${filtered.length} מוצרים:`;
+
     container.innerHTML = filtered.map(p => `
         <div class="product-card">
             <img src="images/products/${p.name}.jpg" onerror="this.onerror=null; this.src='images/logo.jpg'">
@@ -258,7 +263,8 @@ function filterProducts() {
             <div style="color:red; font-weight:bold;">₪${p.price}</div>
             <button class="add-btn" onclick="addToCart('${p.name.replace(/'/g, "\\'")}', '${p.price}')">הוסף לסל +</button>
         </div>
-`).join('');
+    `).join('');
+}
     
     // מעדכן כמה מוצרים נמצאו בתוך הפונקציה
     if (status) {
@@ -290,6 +296,7 @@ window.onload = function() {
 </script>
 </body>
 </html>
+
 
 
 
