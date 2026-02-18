@@ -104,11 +104,10 @@
         <a href="birthday.html" class="dept-card"><img src="images/bday1.jpeg"><h3>ימי הולדת</h3></a>
     </div>
 
-    <div class="search-area">
-        <h2>חיפוש מוצר ובדיקת מלאי</h2>
-        <input type="text" id="productSearch" class="search-input" placeholder="הקלד שם מוצר לחיפוש..." onkeyup="filterProducts()">
-        <div id="search-status" style="margin-top:20px; color: #888;">הקלידו כדי לחפש מוצרים במלאי</div>
-        <div class="products-grid" id="dynamic-products"></div>
+   <div class="search-container" style="text-align: center; margin: 10px auto; padding: 0 20px;">
+    <input type="text" id="productSearch" onkeyup="filterProducts()" 
+           placeholder="חפש מוצר..." 
+           style="width: 100%; max-width: 300px; padding: 8px; border-radius: 20px; border: 1px solid #ccc; outline: none;">
     </div>
 
     <h2 style="text-align:right; border-right: 5px solid var(--primary); padding-right: 15px;">החנות שלנו</h2>
@@ -276,4 +275,5 @@ window.onload = function() {
 </script>
 </body>
 </html>
+
 
