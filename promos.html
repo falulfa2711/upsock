@@ -37,7 +37,7 @@
             height: 180px;
             object-fit: contain;
             border-radius: 8px;
-            cursor: pointer;
+            cursor: pointer; /* מראה שאפשר ללחוץ */
         }
 
         .product-card h4 { margin: 10px 0 5px; font-size: 1.1em; color: var(--dark); height: 2.4em; overflow: hidden; }
@@ -54,6 +54,7 @@
             font-weight: bold;
         }
 
+        /* עיצוב המודל (הגדלת תמונה) */
         .modal {
             display: none;
             position: fixed;
@@ -83,7 +84,8 @@
 <body>
 
     <h1>מבצעי החנות</h1>
-    <div id="promos-container" class="products-container"></div>
+    <div id="promos-container" class="products-container">
+        </div>
 
     <div id="imageModal" class="modal" onclick="closeModal()">
         <span class="close-modal">&times;</span>
@@ -91,25 +93,23 @@
     </div>
 
     <script>
-        // חיבור לעגלה מהזיכרון המשותף (localStorage)
-        let cart = JSON.parse(localStorage.getItem('cart')) || [];
-
         async function loadPromos() {
             try {
                 const response = await fetch('stock_promos.csv');
                 const data = await response.text();
-                const rows = data.split('\n').slice(1);
+                const rows = data.split('\n').slice(1); // דילוג על הכותרת
                 const container = document.getElementById('promos-container');
                 
                 rows.forEach(row => {
                     if (!row.trim()) return;
+                    
+                    // פיצול לפי פסיק (המבנה: שם, מבצע, תמונה)
                     const cols = row.split(',');
                     if (cols.length >= 3) {
                         const name = cols[0].trim();
                         const promo = cols[1].trim();
                         const imgSrc = cols[2].trim();
 
-                        // תיקון: הוספת ה-onclick לכפתור ושליחת שם ומחיר
                         container.innerHTML += `
                             <div class="product-card">
                                 <img src="${imgSrc}" 
@@ -118,7 +118,7 @@
                                      onerror="this.src='images/placeholder.jpg'">
                                 <h4>${name}</h4>
                                 <div class="price">${promo}</div>
-                                <button class="add-btn" onclick="addToCart('${name.replace(/'/g, "\\'")}', '${promo}')">הוסף לסל +</button>
+                                <button class="add-btn">הוסף לסל +</button>
                             </div>
                         `;
                     }
@@ -128,21 +128,7 @@
             }
         }
 
-        // פונקציית הוספה לסל שמסתנכרנת עם דף הבית
-        function addToCart(name, price) {
-            const existing = cart.find(i => i.name === name);
-            if (existing) {
-                existing.qty++;
-            } else {
-                cart.push({ name: name, price: price, qty: 1 });
-            }
-            
-            // שמירה ב-localStorage - זה מה שמאפשר לדף הבית לראות את השינוי
-            localStorage.setItem('cart', JSON.stringify(cart));
-            
-            alert("המוצר " + name + " נוסף לסל בהצלחה!");
-        }
-
+        // פונקציות המודל
         function openModal(src) {
             const modal = document.getElementById('imageModal');
             const modalImg = document.getElementById('imgFull');
@@ -154,6 +140,7 @@
             document.getElementById('imageModal').style.display = "none";
         }
 
+        // טעינה ראשונית
         window.onload = loadPromos;
     </script>
 </body>
