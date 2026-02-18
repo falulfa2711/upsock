@@ -8,7 +8,7 @@
         :root { --primary: #ed1c24; --dark: #1a1a1a; --light: #f8f9fa; --success: #2ecc71; }
         body { font-family: 'Segoe UI', Tahoma, sans-serif; margin: 0; background: var(--light); color: var(--dark); direction: rtl; }
 
-        /* תפריט ועיצוב כללי */
+        /* תפריט עליון */
         .cart-sticky-header {
             position: sticky; top: 0; z-index: 2000;
             background: var(--primary); color: white; padding: 12px;
@@ -24,48 +24,54 @@
 
         .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
 
-        /* גלריית המחלקות */
+        /* גלריית מחלקות */
         .dept-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 20px; margin: 40px 0; }
         .dept-card { background: white; border-radius: 15px; overflow: hidden; text-decoration: none; color: inherit; transition: 0.3s; box-shadow: 0 4px 10px rgba(0,0,0,0.05); text-align: center; }
         .dept-card img { width: 100%; height: 150px; object-fit: cover; }
 
-        /* גלריית החנות */
-        .shop-gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; margin: 40px 0; }
-        .shop-gallery img { width: 100%; height: 200px; object-fit: cover; border-radius: 12px; cursor: pointer; transition: 0.3s; border: 1px solid #eee; }
-        .shop-gallery img:hover { transform: scale(1.03); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
-
-        /* הגדלת תמונה */
-        .image-overlay {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9); z-index: 5000; justify-content: center; align-items: center; cursor: pointer;
+        /* אזור חיפוש - הפתרון לקפיצות */
+        .search-area { 
+            background: white; padding: 40px 20px; border-radius: 20px; margin: 40px 0; 
+            text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            min-height: 400px; /* שומר על גובה קבוע כדי שהדף לא יקפוץ למעלה בחיפוש */
         }
-        .image-overlay img { max-width: 90%; max-height: 90%; border: 4px solid white; border-radius: 10px; }
-        .close-overlay { position: absolute; top: 20px; right: 30px; color: white; font-size: 40px; font-weight: bold; }
-
-        /* חיפוש וכרטיסי מוצר */
-        .search-area { background: white; padding: 40px 20px; border-radius: 20px; margin: 40px 0; text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
         .search-input { width: 100%; max-width: 600px; padding: 15px; border-radius: 50px; border: 2px solid #eee; font-size: 1.2em; text-align: center; outline: none; }
-        .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; margin-top: 30px; }
+        
+        .products-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); 
+            gap: 20px; 
+            margin-top: 30px;
+            min-height: 100px;
+        }
         
         .product-card { 
             background: white; border-radius: 15px; padding: 15px; border: 1px solid #f0f0f0; 
-            text-align: center; display: flex; flex-direction: column; transition: 0.3s;
+            text-align: center; transition: 0.2s;
         }
-        .product-card:hover { transform: translateY(-5px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
-        
-        /* מניעת ריצוד ע"י גובה קבוע לתמונה */
-        .product-img-container {
-            width: 100%; aspect-ratio: 1/1; display: flex; align-items: center; justify-content: center;
-            background: #fff; border-radius: 10px; margin-bottom: 10px; overflow: hidden;
-        }
-        .product-card img { max-width: 100%; max-height: 100%; object-fit: contain; }
 
-        .price { font-size: 1.4em; color: var(--primary); font-weight: bold; margin: 10px 0; }
-        .add-btn { background: var(--dark); color: white; border: none; width: 100%; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        .product-img-box {
+            width: 100%; aspect-ratio: 1/1; margin-bottom: 10px;
+            background: #f9f9f9; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            overflow: hidden;
+        }
+        .product-img-box img { max-width: 100%; max-height: 100%; object-fit: contain; }
+
+        /* גלריית תמונות חנות */
+        .shop-gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px; margin: 40px 0; }
+        .shop-gallery img { width: 100%; height: 180px; object-fit: cover; border-radius: 12px; cursor: pointer; border: 1px solid #eee; }
+
+        /* הגדלת תמונה צפה */
+        .image-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9); z-index: 5000; justify-content: center; align-items: center;
+        }
+        .image-overlay img { max-width: 90%; max-height: 90%; border: 3px solid white; border-radius: 10px; }
 
         /* מודאל עגלה */
         .modal { display: none; position: fixed; z-index: 3000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); }
-        .modal-content { background: white; width: 90%; max-width: 450px; margin: 50px auto; border-radius: 20px; padding: 25px; text-align: right; }
+        .modal-content { background: white; width: 95%; max-width: 450px; margin: 50px auto; border-radius: 20px; padding: 20px; text-align: right; }
     </style>
 </head>
 <body>
@@ -95,8 +101,8 @@
 
     <div class="search-area">
         <h2>חיפוש מוצר ובדיקת מלאי</h2>
-        <input type="text" id="productSearch" class="search-input" placeholder="הקלד שם מוצר לחיפוש..." onkeyup="filterProducts()">
-        <div id="search-status" style="margin-top:20px; color: #888;">הקלידו כדי לחפש מוצרים במלאי</div>
+        <input type="text" id="productSearch" class="search-input" placeholder="הקלד שם מוצר..." onkeyup="filterProducts()">
+        <div id="search-status" style="margin-top:20px; color: #888;">הקלידו כדי לחפש...</div>
         <div class="products-grid" id="dynamic-products"></div>
     </div>
 
@@ -114,8 +120,7 @@
     </div>
 </div>
 
-<div id="imageOverlay" class="image-overlay" onclick="closeImage()">
-    <span class="close-overlay">&times;</span>
+<div id="imageOverlay" class="image-overlay" onclick="this.style.display='none'">
     <img id="overlayImg" src="">
 </div>
 
@@ -137,7 +142,6 @@ let allProducts = [];
 let cart = [];
 
 function showImage(src) { document.getElementById('overlayImg').src = src; document.getElementById('imageOverlay').style.display = 'flex'; }
-function closeImage() { document.getElementById('imageOverlay').style.display = 'none'; }
 
 async function loadInventory() {
     try {
@@ -150,8 +154,7 @@ async function loadInventory() {
             if (cols.length > 7) {
                 const name = cols[2]?.replace(/"/g, '').trim();
                 const price = parseFloat(cols[6]?.replace(/"/g, '').trim());
-                const stock = parseFloat(cols[7]);
-                if (name && !isNaN(price)) allProducts.push({ name, price, stock });
+                if (name && !isNaN(price)) allProducts.push({ name, price });
             }
         }
     } catch (e) { console.error("CSV Error"); }
@@ -161,37 +164,35 @@ function filterProducts() {
     const q = document.getElementById('productSearch').value.toLowerCase().trim();
     const container = document.getElementById('dynamic-products');
     const status = document.getElementById('search-status');
-    if (!q) { container.innerHTML = ""; status.innerText = "הקלידו כדי לחפש..."; return; }
     
-    const filtered = allProducts.filter(p => p.name.toLowerCase().includes(q));
+    if (!q) { 
+        container.innerHTML = ""; 
+        status.innerText = "הקלידו כדי לחפש..."; 
+        return; 
+    }
+    
+    const filtered = allProducts.filter(p => p.name.toLowerCase().includes(q)).slice(0, 20);
     status.innerText = `נמצאו ${filtered.length} מוצרים:`;
     
-    container.innerHTML = filtered.map(p => {
-        const safeName = p.name.replace(/'/g, "\\'");
-        // הפתרון לריצוד: onerror שמבטל את עצמו אחרי פעם אחת כדי למנוע לופ
-        return `
+    container.innerHTML = filtered.map(p => `
         <div class="product-card">
-            <div class="product-img-container">
-                <img src="images/products/${p.name}.jpg" 
-                     onerror="this.onerror=null; this.src='images/logo.jpg';" 
-                     alt="${p.name}">
+            <div class="product-img-box">
+                <img src="images/products/${p.name}.jpg" onerror="this.onerror=null; this.src='images/logo.jpg'">
             </div>
-            <div style="font-size: 0.8em; color: var(--success); font-weight: bold;">מלאי זמין</div>
-            <h4 style="margin: 10px 0; height: 40px; overflow: hidden;">${p.name}</h4>
-            <div class="price">₪${p.price.toFixed(2)}</div>
-            <button class="add-btn" onclick="addToCart('${safeName}', ${p.price})">הוסף לסל +</button>
-        </div>`;
-    }).join('');
+            <h4 style="margin: 5px 0; font-size: 0.9em; height: 35px; overflow: hidden;">${p.name}</h4>
+            <div style="color: var(--primary); font-weight: bold; margin-bottom: 8px;">₪${p.price.toFixed(2)}</div>
+            <button class="add-btn" onclick="addToCart('${p.name.replace(/'/g, "\\'")}', ${p.price})" style="font-size: 0.8em; padding: 8px;">הוסף לסל +</button>
+        </div>
+    `).join('');
 }
 
 function updateUI() {
     let count = 0, total = 0;
     const itemsHtml = cart.map((i, idx) => {
-        let price = i.price;
-        count += i.qty; total += (price * i.qty);
-        return `<div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid #eee;">
-            <span>${i.name} (x${i.qty})</span>
-            <span>₪${(price * i.qty).toFixed(2)}</span>
+        count += i.qty; total += (i.price * i.qty);
+        return `<div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #eee;">
+            <span style="font-size: 0.9em;">${i.name} (x${i.qty})</span>
+            <span>₪${(i.price * i.qty).toFixed(2)}</span>
         </div>`;
     }).join('');
     document.getElementById('cart-count').innerText = count;
