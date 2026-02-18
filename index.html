@@ -244,13 +244,8 @@ function filterProducts() {
     
     const filtered = allProducts.filter(p => {
         const pName = p.name.toLowerCase();
-        
-        // מנקה סיומות מהחיפוש ומשם המוצר כדי להשוות שורשים
-        // זה ינקה: ים, ות, י, ה
         const cleanQ = q.replace(/(ים|ות|י|ה)$/, "");
         const cleanP = pName.replace(/(ים|ות|י|ה)$/, "");
-
-        // בדיקה משולשת: האם אחד מכיל את השני או השורשים זהים
         return pName.includes(cleanQ) || q.includes(cleanP) || cleanP.includes(cleanQ);
     });
 
@@ -265,28 +260,8 @@ function filterProducts() {
         </div>
     `).join('');
 }
-    // מעדכן כמה מוצרים נמצאו בתוך הפונקציה
-    if (status) {
-        status.innerText = `נמצאו ${filtered.length} מוצרים:`;
-    }
-} // סגירה סופית וחסל!
 
-function toggleCart() {
-    const m = document.getElementById('cartModal');
-    m.style.display = m.style.display === 'block' ? 'none' : 'block';
-}
-
-function sendToWhatsApp() {
-    if (cart.length === 0) return;
-    let msg = "שלום Up סטוק, אני רוצה להזמין:\n\n";
-    cart.forEach(i => {
-        let linePrice = extractPrice(i.price) * (i.qty || 1);
-        msg += `• ${i.name} (x${i.qty || 1}) - ₪${linePrice.toFixed(2)}\n`;
-    });
-    msg += `\n*סה"כ לתשלום: ₪${document.getElementById('cart-total-modal').innerText}*`;
-    window.open(`https://wa.me/972549397753?text=${encodeURIComponent(msg)}`);
-}
-
+// שים לב - כאן התיקון לסוף הקובץ
 window.onload = function() {
     loadInventory();
     cart = JSON.parse(localStorage.getItem('cart')) || [];
@@ -295,6 +270,7 @@ window.onload = function() {
 </script>
 </body>
 </html>
+
 
 
 
