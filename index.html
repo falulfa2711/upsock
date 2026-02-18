@@ -236,7 +236,15 @@ function filterProducts() {
     const container = document.getElementById('dynamic-products');
     const status = document.getElementById('search-status');
     if (!q) { container.innerHTML = ""; status.innerText = "הקלידו כדי לחפש מוצרים במלאי"; return; }
-   const filtered = allProducts.filter(p => p.name.toLowerCase().includes(q) || q.includes(p.name.toLowerCase()));
+  const filtered = allProducts.filter(p => {
+        const productName = p.name.toLowerCase();
+        const searchTerm = q.toLowerCase();
+        
+        // מנקה "ים" או "ות" מסוף המילה כדי למצוא גם יחיד וגם רבים
+        const cleanSearch = searchTerm.replace(/ים$|ות$/, "");
+
+        return productName.includes(cleanSearch);
+    });
     
     container.innerHTML = filtered.map(p => {
         const imgSrc = `images/products/${p.name}.jpg`; 
@@ -276,5 +284,6 @@ window.onload = function() {
 </script>
 </body>
 </html>
+
 
 
