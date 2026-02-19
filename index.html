@@ -235,28 +235,29 @@ function filterProducts() {
     const q = document.getElementById('productSearch').value.toLowerCase().trim();
     const container = document.getElementById('dynamic-products');
     const status = document.getElementById('search-status');
-    
+
     if (!q || q.length < 2) { 
         container.innerHTML = ""; 
-        if(status) status.innerText = "";
+        if (status) status.innerText = "";
         return; 
     }
-    
-  const filtered = allProducts.filter(p => {
+
+    const filtered = allProducts.filter(p => {
         const pName = p.name.toLowerCase();
         const searchVal = q.toLowerCase();
 
-        // 1. ניקוי בסיסי של סיומות מהחיפוש (רק בשביל הבדיקה)
-        const rootSearch = searchVal.replace(/(ים|ות|י|ה)$/, "");
-        
-        // 2. בדיקה: האם השם מכיל את החיפוש, או החיפוש מכיל את השם, 
+        // ניקוי בסיסי של סיומות מהחיפוש
+        const rootSearch = searchVal.replace(/(ים|ות|י|ה|ים|ים|ונים|ותים|ים|ים|ות)$/, "");
+
+        // בדיקה אם השם מכיל את החיפוש, או החיפוש מכיל את השם, 
         // או שהשורש של החיפוש נמצא בשם המוצר
         return pName.includes(searchVal) || 
                searchVal.includes(pName) || 
-               pName.includes(rootSearch);
+               pName.includes(rootSearch) ||
+               (rootSearch && pName.startsWith(rootSearch));
     });
 
-    if(status) status.innerText = `נמצאו ${filtered.length} מוצרים:`;
+    if (status) status.innerText = `נמצאו ${filtered.length} מוצרים:`;
 
     container.innerHTML = filtered.map(p => `
         <div class="product-card">
@@ -277,6 +278,7 @@ window.onload = function() {
 </script>
 </body>
 </html>
+
 
 
 
