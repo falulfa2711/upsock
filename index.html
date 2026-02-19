@@ -223,6 +223,7 @@ function clearCart() {
     }
 }
 
+// פונקציית טעינת המבצעים - נשארת פשוטה
 async function loadPromoData() {
     try {
         const response = await fetch('stock_promos.csv?t=' + Date.now());
@@ -230,16 +231,12 @@ async function loadPromoData() {
         const rows = data.split('\n').slice(1); 
         window.promoProducts = rows.map(row => {
             const cols = row.split(',');
-            // לפי ה-CSV שלך: שם בעמודה 1 (אינדקס 0), תמונה בעמודה 3 (אינדקס 2)
             if (cols.length >= 3) {
-                return { 
-                    name: cols[0].trim(), 
-                    image: cols[2].trim() 
-                };
+                return { name: cols[0].trim(), image: cols[2].trim() };
             }
             return null;
         }).filter(p => p !== null);
-    } catch (e) { console.error("טעינת מבצעים נכשלה"); }
+    } catch (e) { window.promoProducts = []; }
 }
 
 function filterProducts() {
@@ -247,23 +244,22 @@ function filterProducts() {
     const container = document.getElementById('dynamic-products');
     const status = document.getElementById('search-status');
     
-    if (!q || q.length < 2) { container.innerHTML = ""; status.innerText = ""; return; }
+    if (!q || q.length < 2) { 
+        container.innerHTML = ""; 
+        status.innerText = ""; 
+        return; 
+    }
 
+    // זה הקוד המקורי שהחזיר תוצאות - לא נוגעים בו!
     const filtered = allProducts.filter(p => p.name.toLowerCase().includes(q));
     status.innerText = `נמצאו ${filtered.length} מוצרים:`;
 
-    const normalize = (str) => str.replace(/[יו]/g, '').replace(/\s+/g, '');
-
     container.innerHTML = filtered.map(p => {
-        const pNameClean = normalize(p.name.toLowerCase());
-        
-        const promoMatch = (window.promoProducts || []).find(promo => {
-            const promoNameClean = normalize(promo.name.toLowerCase());
-            return pNameClean.includes(promoNameClean) || promoNameClean.includes(pNameClean);
-        });
-
+        // בדיקה פשוטה: האם השם זהה למה שיש במבצעים?
+        const promoMatch = (window.promoProducts || []).find(promo => promo.name === p.name);
         let imageSrc = promoMatch ? promoMatch.image : `images/products/${p.name}.jpg`;
         
+        // הגדרת תמונה גנרית ל"תבניות אלומיניום"
         let fallbackImage = "images/logo.jpg";
         if (p.name.includes("תבנית") || p.name.includes("אלומיניום")) {
             fallbackImage = "images/bake1.jpeg"; 
@@ -337,6 +333,7 @@ window.onload = function() {
 </script>
 </body>
 </html>
+
 
 
 
