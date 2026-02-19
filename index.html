@@ -223,6 +223,25 @@ function clearCart() {
     }
 }
 
+async function loadPromoData() {
+    try {
+        const response = await fetch('stock_promos.csv?t=' + Date.now());
+        const data = await response.text();
+        const rows = data.split('\n').slice(1); 
+        window.promoProducts = rows.map(row => {
+            const cols = row.split(',');
+            // לפי ה-CSV שלך: שם בעמודה 1 (אינדקס 0), תמונה בעמודה 3 (אינדקס 2)
+            if (cols.length >= 3) {
+                return { 
+                    name: cols[0].trim(), 
+                    image: cols[2].trim() 
+                };
+            }
+            return null;
+        }).filter(p => p !== null);
+    } catch (e) { console.error("טעינת מבצעים נכשלה"); }
+}
+
 function filterProducts() {
     const q = document.getElementById('productSearch').value.toLowerCase().trim();
     const container = document.getElementById('dynamic-products');
@@ -233,13 +252,11 @@ function filterProducts() {
     const filtered = allProducts.filter(p => p.name.toLowerCase().includes(q));
     status.innerText = `נמצאו ${filtered.length} מוצרים:`;
 
-    // פונקציית עזר לניקוי שמות (הסרת י' ו-ו' ורווחים לצורך השוואה)
     const normalize = (str) => str.replace(/[יו]/g, '').replace(/\s+/g, '');
 
     container.innerHTML = filtered.map(p => {
         const pNameClean = normalize(p.name.toLowerCase());
         
-        // חיפוש חכם במבצעים
         const promoMatch = (window.promoProducts || []).find(promo => {
             const promoNameClean = normalize(promo.name.toLowerCase());
             return pNameClean.includes(promoNameClean) || promoNameClean.includes(pNameClean);
@@ -247,7 +264,6 @@ function filterProducts() {
 
         let imageSrc = promoMatch ? promoMatch.image : `images/products/${p.name}.jpg`;
         
-        // גיבוי למחלקת אפייה
         let fallbackImage = "images/logo.jpg";
         if (p.name.includes("תבנית") || p.name.includes("אלומיניום")) {
             fallbackImage = "images/bake1.jpeg"; 
@@ -321,6 +337,7 @@ window.onload = function() {
 </script>
 </body>
 </html>
+
 
 
 
