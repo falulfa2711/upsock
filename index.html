@@ -233,20 +233,23 @@ function filterProducts() {
     const filtered = allProducts.filter(p => p.name.toLowerCase().includes(q));
     status.innerText = `נמצאו ${filtered.length} מוצרים:`;
 
+    // פונקציית עזר לניקוי שמות (הסרת י' ו-ו' ורווחים לצורך השוואה)
+    const normalize = (str) => str.replace(/[יו]/g, '').replace(/\s+/g, '');
+
     container.innerHTML = filtered.map(p => {
-        const pNameClean = p.name.toLowerCase().trim();
+        const pNameClean = normalize(p.name.toLowerCase());
         
-        // השוואה גמישה: בודק אם השם מהמבצעים מופיע בתוך השם מהמלאי או להיפך
+        // חיפוש חכם במבצעים
         const promoMatch = (window.promoProducts || []).find(promo => {
-            const promoNameClean = promo.name.toLowerCase().trim();
+            const promoNameClean = normalize(promo.name.toLowerCase());
             return pNameClean.includes(promoNameClean) || promoNameClean.includes(pNameClean);
         });
 
         let imageSrc = promoMatch ? promoMatch.image : `images/products/${p.name}.jpg`;
         
-        // גיבוי לתבניות אלומיניום או מוצרי אפייה
+        // גיבוי למחלקת אפייה
         let fallbackImage = "images/logo.jpg";
-        if (pNameClean.includes("תבנית") || pNameClean.includes("אלומיניום")) {
+        if (p.name.includes("תבנית") || p.name.includes("אלומיניום")) {
             fallbackImage = "images/bake1.jpeg"; 
         }
 
@@ -317,5 +320,6 @@ window.onload = function() {
 </script>
 </body>
 </html>
+
 
 
