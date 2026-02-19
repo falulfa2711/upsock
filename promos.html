@@ -49,13 +49,20 @@
             width: 100%; font-weight: bold; transition: 0.3s;
         }
 
+        /* תיקון המודאל שיהיה זהה לדף הבית */
         .modal { display: none; position: fixed; z-index: 5000; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); justify-content: center; align-items: center; }
-        .modal-cart-content { background: white; width: 90%; max-width: 450px; border-radius: 20px; padding: 25px; text-align: right; color: #1a1a1a; }
-        .cart-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; }
         
-        .clear-btn { background: none; border: none; color: #888; cursor: pointer; font-size: 0.9em; text-decoration: underline; }
+        .modal-cart-content { 
+            background: white; width: 90%; max-width: 450px; border-radius: 20px; padding: 25px; 
+            text-align: right; color: #1a1a1a; 
+            max-height: 90vh; overflow-y: auto; position: relative; box-sizing: border-box; /* תיקון הגלילה */
+        }
 
-        /* עיצוב שדות הפרטים */
+        .cart-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #eee; }
+        
+        /* כפתור ריקון מעוצב כמו בדף הבית */
+        .clear-cart-btn { background: none; border: 1px solid #ccc; color: #666; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+
         .customer-details { margin-top: 20px; padding: 15px; background: #f9f9f9; border-radius: 10px; border: 1px solid #eee; }
         .customer-details label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 0.9em; }
         .customer-details input { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
@@ -85,9 +92,10 @@
         <div class="modal-cart-content" onclick="event.stopPropagation()">
             <div style="display: flex; justify-content: space-between; align-items: center;">
                 <h2 style="margin:0;">הסל שלי 🛍️</h2>
-                <button onclick="clearCart()" class="clear-btn">רוקן סל</button>
+                <button onclick="clearCart()" class="clear-cart-btn">🗑️ ריקון</button>
             </div>
-            <div id="cart-items-list" style="max-height: 250px; overflow-y: auto; margin-top: 15px;"></div>
+            
+            <div id="cart-items-list" style="max-height: 200px; overflow-y: auto; margin-top: 15px; border-bottom: 1px solid #eee;"></div>
             
             <div class="customer-details">
                 <label>👤 שם מלא (חובה):</label>
@@ -100,35 +108,55 @@
                 <input type="text" id="cust-location" placeholder="לאן להגיע?">
             </div>
 
-            <div style="display: flex; justify-content: space-between; font-size: 1.5em; font-weight: bold; border-top: 2px solid #eee; margin-top: 15px; padding-top: 10px;">
+            <div style="display: flex; justify-content: space-between; font-size: 1.5em; font-weight: bold; margin-top: 15px; padding-top: 10px;">
                 <span>סה"כ:</span>
                 <span>₪<span id="cart-total-modal">0.00</span></span>
             </div>
-            <button onclick="sendToWhatsApp()" style="background: #25d366; color: white; border: none; width: 100%; padding: 15px; border-radius: 10px; font-size: 1.2em; font-weight: bold; cursor: pointer; margin-top: 15px;">שלח הזמנה לוואטסאפ</button>
+            <button onclick="sendToWhatsApp()" style="background: #25d366; color: white; border: none; width: 100%; padding: 15px; border-radius: 10px; font-size: 1.2em; font-weight: bold; cursor: pointer; margin-top: 15px;">שלח הזמנה בוואטסאפ</button>
             <button onclick="toggleCart()" style="width: 100%; background: none; border: none; color: #999; cursor: pointer; margin-top: 10px;">סגור</button>
         </div>
     </div>
 
     <script>
+        function extractPrice(priceValue) {
+            if (typeof priceValue === 'number') return priceValue;
+            let matches = String(priceValue).match(/\d+(\.\d+)?/g);
+            return matches ? parseFloat(matches[matches.length - 1]) : 0;
+        }
+
         function updateUI() {
             const cart = JSON.parse(localStorage.getItem('cart')) || [];
             let count = 0; let total = 0;
             
-            const itemsHtml = cart.map(i => {
-                const matches = i.price.match(/\d+(\.\d+)?/g);
-                const price = matches ? parseFloat(matches[matches.length - 1]) : 0;
+            const itemsHtml = cart.map((i, idx) => {
+                const price = extractPrice(i.price);
                 let qty = i.qty || 1;
-                count += qty; total += (price * qty);
+                let lineTotal = price * qty;
+                count += qty; total += lineTotal;
                 return `<div class="cart-item">
-                    <span>₪${(price * qty).toFixed(2)}</span>
-                    <span><strong>${i.name}</strong> (x${qty})</span>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <button onclick="removeItem(${idx})" style="background:none; border:none; color:red; cursor:pointer; font-size: 1.2em;">×</button>
+                        <span style="font-weight: bold;">₪${lineTotal.toFixed(2)}</span>
+                    </div>
+                    <div style="text-align: right;">
+                        <strong>${i.name}</strong>
+                        <div style="font-size: 0.8em; color: #666;">(x${qty})</div>
+                    </div>
                 </div>`;
             }).join('');
 
             document.getElementById('cart-count').innerText = count;
             document.getElementById('cart-total-header').innerText = total.toFixed(2);
             document.getElementById('cart-total-modal').innerText = total.toFixed(2);
-            document.getElementById('cart-items-list').innerHTML = itemsHtml || "הסל ריק";
+            document.getElementById('cart-items-list').innerHTML = itemsHtml || '<div style="text-align:center; padding:20px; color:#888;">הסל ריק</div>';
+        }
+
+        // פונקציית הסרה כמו בדף הבית
+        function removeItem(idx) {
+            let cart = JSON.parse(localStorage.getItem('cart')) || [];
+            cart.splice(idx, 1);
+            localStorage.setItem('cart', JSON.stringify(cart));
+            updateUI();
         }
 
         async function loadPromos() {
@@ -192,7 +220,7 @@
             const location = document.getElementById('cust-location').value.trim();
 
             if (currentCart.length === 0) return alert("הסל ריק");
-            if (!name || !phone) return alert("חובה למלא שם ומספר טלפון כדי שנוכל לתאם את ההזמנה");
+            if (!name || !phone) return alert("חובה למלא שם ומספר טלפון");
 
             let msg = "*הזמנה חדשה - Up סטוק*\n";
             msg += "--------------------------\n";
@@ -203,8 +231,7 @@
 
             let totalOrder = 0;
             currentCart.forEach(i => {
-                const matches = i.price.match(/\d+(\.\d+)?/g);
-                const price = matches ? parseFloat(matches[matches.length - 1]) : 0;
+                const price = extractPrice(i.price);
                 const qty = i.qty || 1;
                 const lineTotal = price * qty;
                 totalOrder += lineTotal;
@@ -214,8 +241,7 @@
             msg += "--------------------------\n";
             msg += `💰 *סה"כ לתשלום: ₪${totalOrder.toFixed(2)}*`;
 
-            const phoneNumber = "972549397753"; 
-            window.location.href = "https://wa.me/" + phoneNumber + "?text=" + encodeURIComponent(msg);
+            window.location.href = "https://wa.me/972549397753?text=" + encodeURIComponent(msg);
         }
 
         function openModal(src) { document.getElementById('imageModal').style.display = "flex"; document.getElementById('imgFull').src = src; }
