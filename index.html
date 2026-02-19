@@ -223,71 +223,24 @@ function clearCart() {
     }
 }
 
-// פונקציית טעינת המבצעים - נשארת פשוטה
-async function loadPromoData() {
-    try {
-        const response = await fetch('stock_promos.csv?t=' + Date.now());
-        const data = await response.text();
-        const rows = data.split('\n').slice(1); 
-        window.promoProducts = rows.map(row => {
-            const cols = row.split(',');
-            if (cols.length >= 3) {
-                return { name: cols[0].trim(), image: cols[2].trim() };
-            }
-            return null;
-        }).filter(p => p !== null);
-    } catch (e) { window.promoProducts = []; }
-}
-
 function filterProducts() {
     const q = document.getElementById('productSearch').value.toLowerCase().trim();
     const container = document.getElementById('dynamic-products');
     const status = document.getElementById('search-status');
-    
-    if (!q || q.length < 2) { 
-        container.innerHTML = ""; 
-        status.innerText = ""; 
-        return; 
-    }
+    if (!q || q.length < 2) { container.innerHTML = ""; status.innerText = ""; return; }
 
-    // זה הקוד המקורי שהחזיר תוצאות - לא נוגעים בו!
     const filtered = allProducts.filter(p => p.name.toLowerCase().includes(q));
     status.innerText = `נמצאו ${filtered.length} מוצרים:`;
-
-    container.innerHTML = filtered.map(p => {
-        // בדיקה פשוטה: האם השם זהה למה שיש במבצעים?
-        const promoMatch = (window.promoProducts || []).find(promo => promo.name === p.name);
-        let imageSrc = promoMatch ? promoMatch.image : `images/products/${p.name}.jpg`;
-        
-        // הגדרת תמונה גנרית ל"תבניות אלומיניום"
-        let fallbackImage = "images/logo.jpg";
-        if (p.name.includes("תבנית") || p.name.includes("אלומיניום")) {
-            fallbackImage = "images/bake1.jpeg"; 
-        }
-
-        return `
-            <div class="product-card">
-                <img src="${imageSrc}" onerror="this.src='${fallbackImage}'" onclick="openImg(this.src)">
-                <h4>${p.name}</h4>
-                <div style="color:var(--primary); font-weight:bold; font-size:1.2em; margin-bottom:10px;">₪${p.price}</div>
-                <button class="add-btn" onclick="addToCart('${p.name.replace(/'/g, "\\'")}', '${p.price}')">הוסף לסל +</button>
-            </div>
-        `;
-    }).join('');
-}
-        return `
-            <div class="product-card">
-                <img src="${imageSrc}" onerror="this.src='${fallbackImage}'" onclick="openImg(this.src)">
-                <h4>${p.name}</h4>
-                <div style="color:var(--primary); font-weight:bold; font-size:1.2em; margin-bottom:10px;">₪${p.price}</div>
-                <button class="add-btn" onclick="addToCart('${p.name.replace(/'/g, "\\'")}', '${p.price}')">הוסף לסל +</button>
-            </div>
-        `;
-    }).join('');
+    container.innerHTML = filtered.map(p => `
+        <div class="product-card">
+            <img src="images/products/${p.name}.jpg" onerror="this.src='images/logo.jpg'">
+            <h4>${p.name}</h4>
+            <div style="color:var(--primary); font-weight:bold; font-size:1.2em; margin-bottom:10px;">₪${p.price}</div>
+            <button class="add-btn" onclick="addToCart('${p.name.replace(/'/g, "\\'")}', '${p.price}')">הוסף לסל +</button>
+        </div>
+    `).join('');
 }
 
-// אל תשכח להוסיף את השורה הזו בתוך ה-window.onload הקיים שלך:
-// loadPromoData();
 function toggleCart() {
     const m = document.getElementById('cartModal');
     m.style.display = (m.style.display === 'block') ? 'none' : 'block';
@@ -327,15 +280,8 @@ function sendToWhatsApp() {
 
 window.onload = function() {
     loadInventory();
-    loadPromoData(); // השורה שמוסיפה את המבצעים לזיכרון
     updateUI();
 };
 </script>
 </body>
 </html>
-
-
-
-
-
-
