@@ -245,10 +245,8 @@ function filterProducts() {
         return; 
     }
 
-    // 1. פונקציית נרמול: הופכת אותיות סופיות לרגילות כדי ש"בלון" ו"בלונ" יהיו זהים
+    // נרמול אותיות סופיות כדי ש"בלון" ו"בלונים" ייפגשו
     const normalize = (str) => str.replace(/ך/g, 'כ').replace(/ם/g, 'מ').replace(/ן/g, 'נ').replace(/ף/g, 'פ').replace(/ץ/g, 'צ');
-    
-    // 2. רגקס לניקוי סיומות (ימ, ות, ה, י) - שים לב שזה "ימ" כי הנרמול הופך ם ל-מ
     const suffixRegex = /(ימ|ות|י|ה)$/;
 
     const filtered = allProducts.filter(p => {
@@ -256,7 +254,6 @@ function filterProducts() {
         const qNormalized = normalize(q);
         const rootSearch = qNormalized.replace(suffixRegex, "");
 
-        // בדיקה: האם השם מכיל את החיפוש או את השורש של החיפוש
         return pNameNormalized.includes(qNormalized) || 
                qNormalized.includes(pNameNormalized) || 
                pNameNormalized.includes(rootSearch);
@@ -273,13 +270,13 @@ function filterProducts() {
         </div>
     `).join('');
 }
+
 function toggleCart() {
     const cartModal = document.getElementById('cart-modal');
     if (cartModal) {
-        // פותח או סוגר את חלון העגלה
         if (cartModal.style.display === 'none' || cartModal.style.display === '') {
             cartModal.style.display = 'block';
-            if (typeof updateUI === 'function') updateUI(); 
+            if (typeof updateUI === 'function') updateUI();
         } else {
             cartModal.style.display = 'none';
         }
@@ -292,8 +289,10 @@ window.onload = function() {
     if (typeof updateUI === 'function') updateUI();
 };
 </script>
+</script>
 </body>
 </html>
+
 
 
 
