@@ -181,13 +181,32 @@
             modal.style.display = (modal.style.display === 'flex') ? 'none' : 'flex';
             if (modal.style.display === 'flex') updateUI();
         }
+function sendToWhatsApp() {
+    const cart = JSON.parse(localStorage.getItem('cart')) || [];
+    if (cart.length === 0) return alert("הסל ריק");
 
-        function sendToWhatsApp() {
-            if (cart.length === 0) return alert("הסל ריק");
-            let msg = "הזמנה חדשה מאתר Up סטוק:\n";
-            cart.forEach(i => msg += `- ${i.name} (כמות: ${i.qty})\n`);
-            window.location.href = "https://wa.me/972549397753?text=" + encodeURIComponent(msg);
-        }
+    let msg = "הזמנה חדשה מאתר Up סטוק:\n";
+    msg += "--------------------------\n";
+    let totalOrder = 0;
+
+    cart.forEach(i => {
+        // לוגיקה לזיהוי המחיר - לוקח את המספר האחרון (למשל 22 מתוך "2 ב-22")
+        const matches = i.price.match(/\d+(\.\d+)?/g);
+        const price = matches ? parseFloat(matches[matches.length - 1]) : 0;
+        const qty = i.qty || 1;
+        const lineTotal = price * qty;
+        totalOrder += lineTotal;
+
+        msg += `• ${i.name}\n  כמות: ${qty} | סה"כ: ₪${lineTotal.toFixed(2)}\n`;
+    });
+
+    msg += "--------------------------\n";
+    msg += `💰 סה"כ לתשלום: ₪${totalOrder.toFixed(2)}`;
+
+    // המספר המעודכן שלך
+    const phoneNumber = "972549397753"; 
+    window.location.href = "https://wa.me/" + phoneNumber + "?text=" + encodeURIComponent(msg);
+}
 
         function openModal(src) { document.getElementById('imageModal').style.display = "flex"; document.getElementById('imgFull').src = src; }
         function closeModal() { document.getElementById('imageModal').style.display = "none"; }
@@ -196,4 +215,5 @@
     </script>
 </body>
 </html>
+
 
