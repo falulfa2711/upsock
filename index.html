@@ -287,11 +287,19 @@ window.onload = function() {
     if (typeof loadInventory === 'function') loadInventory();
     cart = JSON.parse(localStorage.getItem('cart')) || [];
     if (typeof updateUI === 'function') updateUI();
+
+    // התיקון החדש: מאזין ללחיצה על העגלה באופן אוטומטי
+    const cartBtn = document.querySelector('.cart-icon') || document.querySelector('[onclick*="toggleCart"]');
+    if (cartBtn) {
+        cartBtn.onclick = function() { toggleCart(); };
+        cartBtn.style.cursor = 'pointer'; // הופך את העכבר ליד
+    }
 };
 </script>
 </script>
 </body>
 </html>
+
 
 
 
