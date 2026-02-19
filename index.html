@@ -55,7 +55,6 @@
         .cart-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #eee; }
         .clear-cart-btn { background: none; border: 1px solid #ccc; color: #666; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; }
 
-        /* שדות פרטי לקוח */
         .customer-form { margin-top: 15px; padding: 15px; background: #f9f9f9; border-radius: 12px; }
         .customer-form label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 0.9em; }
         .customer-form input { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; }
@@ -152,8 +151,8 @@ function openImg(src) {
 
 function extractPrice(priceValue) {
     if (typeof priceValue === 'number') return priceValue;
-    if (priceValue.includes('ב-')) {
-        let parts = priceValue.split('ב-');
+    if (String(priceValue).includes('ב-')) {
+        let parts = String(priceValue).split('ב-');
         let extracted = parseFloat(parts[1]);
         return isNaN(extracted) ? 0 : extracted;
     }
@@ -227,22 +226,50 @@ function filterProducts() {
     const q = document.getElementById('productSearch').value.toLowerCase().trim();
     const container = document.getElementById('dynamic-products');
     const status = document.getElementById('search-status');
-    if (!q || q.length < 2) { container.innerHTML = ""; status.innerText = ""; return; }
+    
+    if (!q || q.length < 2) { 
+        container.innerHTML = ""; 
+        status.innerText = ""; 
+        return; 
+    }
 
     const filtered = allProducts.filter(p => {
-    const productName = p.name.toLowerCase();
-    // בודק אם השם מכיל את החיפוש (קנקן -> קנקנים) או שהחיפוש מכיל את השם (קנקנים -> קנקן)
-    return productName.includes(q) || q.includes(productName);
-});
+        const productName = p.name.toLowerCase();
+        
+        // 1. חיפוש ישיר דו-כיווני
+        if (productName.includes(q) || q.includes(productName)) return true;
+        
+        // 2. טיפול ב-ן' סופית מול נ' רגילה (קנקן -> קנקנים)
+        if (productName.endsWith('ן')) {
+            const baseWithN = productName.slice(0, -1) + 'נ';
+            if (q.includes(baseWithN)) return true;
+        }
+        
+        // 3. טיפול בסיומת יחיד/רבים קלאסית
+        if (q.endsWith('ים') && productName.includes(q.slice(0, -2))) return true;
+        if (q.endsWith('ות') && productName.includes(q.slice(0, -2))) return true;
+
+        return false;
+    });
+
     status.innerText = `נמצאו ${filtered.length} מוצרים:`;
-    container.innerHTML = filtered.map(p => `
-        <div class="product-card">
-            <img src="images/products/${p.name}.jpg" onerror="this.src='images/logo.jpg'">
-            <h4>${p.name}</h4>
-            <div style="color:var(--primary); font-weight:bold; font-size:1.2em; margin-bottom:10px;">₪${p.price}</div>
-            <button class="add-btn" onclick="addToCart('${p.name.replace(/'/g, "\\'")}', '${p.price}')">הוסף לסל +</button>
-        </div>
-    `).join('');
+    
+    container.innerHTML = filtered.map(p => {
+        // לוגיקה לתמונות: כל תבנית אלומיניום מקבלת גיבוי של תמונת אפייה
+        let fallback = "images/logo.jpg";
+        if (p.name.includes("תבנית") || p.name.includes("אלומיניום")) {
+            fallback = "images/bake1.jpeg";
+        }
+
+        return `
+            <div class="product-card">
+                <img src="images/products/${p.name}.jpg" onerror="this.src='${fallback}'" onclick="openImg(this.src)">
+                <h4>${p.name}</h4>
+                <div style="color:var(--primary); font-weight:bold; font-size:1.2em; margin-bottom:10px;">₪${p.price}</div>
+                <button class="add-btn" onclick="addToCart('${p.name.replace(/'/g, "\\'")}', '${p.price}')">הוסף לסל +</button>
+            </div>
+        `;
+    }).join('');
 }
 
 function toggleCart() {
@@ -289,4 +316,3 @@ window.onload = function() {
 </script>
 </body>
 </html>
-
