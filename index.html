@@ -223,20 +223,6 @@ function clearCart() {
     }
 }
 
-// --- החלפת הפונקציה הישנה בחדשה ---
-
-async function loadPromoData() {
-    try {
-        const response = await fetch('stock_promos.csv?t=' + Date.now());
-        const data = await response.text();
-        const rows = data.split('\n').slice(1);
-        window.promoProducts = rows.map(row => {
-            const cols = row.split(',');
-            return cols.length >= 3 ? { name: cols[0].trim(), image: cols[2].trim() } : null;
-        }).filter(p => p !== null);
-    } catch (e) { window.promoProducts = []; }
-}
-
 function filterProducts() {
     const q = document.getElementById('productSearch').value.toLowerCase().trim();
     const container = document.getElementById('dynamic-products');
@@ -248,16 +234,32 @@ function filterProducts() {
     status.innerText = `נמצאו ${filtered.length} מוצרים:`;
 
     container.innerHTML = filtered.map(p => {
-        // בודק אם יש תמונה במבצעים
-        const promoMatch = (window.promoProducts || []).find(promo => promo.name === p.name);
+        const pNameClean = p.name.toLowerCase().trim();
+        
+        // השוואה גמישה: בודק אם השם מהמבצעים מופיע בתוך השם מהמלאי או להיפך
+        const promoMatch = (window.promoProducts || []).find(promo => {
+            const promoNameClean = promo.name.toLowerCase().trim();
+            return pNameClean.includes(promoNameClean) || promoNameClean.includes(pNameClean);
+        });
+
         let imageSrc = promoMatch ? promoMatch.image : `images/products/${p.name}.jpg`;
         
-        // הגדרת תמונה גנרית למקרה שאין תמונה (למשל לתבניות אלומיניום)
+        // גיבוי לתבניות אלומיניום או מוצרי אפייה
         let fallbackImage = "images/logo.jpg";
-        if (p.name.includes("תבנית") || p.name.includes("אלומיניום")) {
+        if (pNameClean.includes("תבנית") || pNameClean.includes("אלומיניום")) {
             fallbackImage = "images/bake1.jpeg"; 
         }
 
+        return `
+            <div class="product-card">
+                <img src="${imageSrc}" onerror="this.src='${fallbackImage}'" onclick="openImg(this.src)">
+                <h4>${p.name}</h4>
+                <div style="color:var(--primary); font-weight:bold; font-size:1.2em; margin-bottom:10px;">₪${p.price}</div>
+                <button class="add-btn" onclick="addToCart('${p.name.replace(/'/g, "\\'")}', '${p.price}')">הוסף לסל +</button>
+            </div>
+        `;
+    }).join('');
+}
         return `
             <div class="product-card">
                 <img src="${imageSrc}" onerror="this.src='${fallbackImage}'" onclick="openImg(this.src)">
@@ -315,4 +317,5 @@ window.onload = function() {
 </script>
 </body>
 </html>
+
 
