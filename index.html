@@ -55,7 +55,6 @@
         .cart-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #eee; }
         .clear-cart-btn { background: none; border: 1px solid #ccc; color: #666; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; }
 
-        /* שדות פרטי לקוח */
         .customer-form { margin-top: 15px; padding: 15px; background: #f9f9f9; border-radius: 12px; }
         .customer-form label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 0.9em; }
         .customer-form input { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; }
@@ -81,7 +80,7 @@
 <div class="container">
     <div class="dept-grid">
         <a href="hadpaami.html" class="dept-card"><img src="images/hadpaami.jpg"><h3>חד פעמי</h3></a>
-        <a href="baking.html" class="dept-card"><img src="images/bake1.jpeg"><h3>אפייה ומטבח</h3></a>
+        <a href="baking.html" class="dept-card"><img src="images/bake1.jpeg"><h3>תבניות אלומיניום</h3></a>
         <a href="cleaning.html" class="dept-card"><img src="images/clean1.jpeg"><h3>מוצרי ניקיון</h3></a>
         <a href="birthday.html" class="dept-card"><img src="images/bday1.jpeg"><h3>ימי הולדת</h3></a>
     </div>
@@ -152,12 +151,13 @@ function openImg(src) {
 
 function extractPrice(priceValue) {
     if (typeof priceValue === 'number') return priceValue;
-    if (priceValue.includes('ב-')) {
-        let parts = priceValue.split('ב-');
+    let pStr = String(priceValue);
+    if (pStr.includes('ב-')) {
+        let parts = pStr.split('ב-');
         let extracted = parseFloat(parts[1]);
         return isNaN(extracted) ? 0 : extracted;
     }
-    let cleaned = parseFloat(String(priceValue).replace(/[^\d.]/g, ''));
+    let cleaned = parseFloat(pStr.replace(/[^\d.]/g, ''));
     return isNaN(cleaned) ? 0 : cleaned;
 }
 
@@ -197,6 +197,7 @@ function updateUI() {
             </div>
         </div>`;
     }).join('');
+    
     document.getElementById('cart-count').innerText = count;
     document.getElementById('cart-total-header').innerText = total.toFixed(2);
     document.getElementById('cart-total-modal').innerText = total.toFixed(2);
@@ -223,51 +224,81 @@ function clearCart() {
     }
 }
 
+// פונקציה לפתיחת/סגירת העגלה - הייתה חסרה!
+function toggleCart() {
+    const m = document.getElementById('cartModal');
+    if (m.style.display === 'block') {
+        m.style.display = 'none';
+    } else {
+        updateUI(); // מרענן את הנתונים מהזיכרון רגע לפני הפתיחה
+        m.style.display = 'block';
+    }
+}
+
 function filterProducts() {
-    // 1. ניקוי החיפוש מרווחים (מטפל בבעיה שראינו ב-Console)
     const qRaw = document.getElementById('productSearch').value.toLowerCase().trim();
     const container = document.getElementById('dynamic-products');
-    
     if (!qRaw || qRaw.length < 2) { container.innerHTML = ""; return; }
 
-    // 2. נירמול אותיות סופיות (ן -> נ) - פותר את בעיית קנקן/קנקנ
     function fix(s) { return s.replace(/ך/g,'כ').replace(/ם/g,'מ').replace(/ן/g,'נ').replace(/ף/g,'פ').replace(/ץ/g,'צ'); }
-    
     const qFixed = fix(qRaw);
-    // גרסה קצרה לחיפוש רבנים (קנקנים -> קנקנ)
     let qShort = qFixed;
     if (qFixed.endsWith('ימ') && qFixed.length > 3) qShort = qFixed.slice(0, -2);
     if (qFixed.endsWith('ות') && qFixed.length > 3) qShort = qFixed.slice(0, -2);
 
     const filtered = allProducts.filter(p => {
-        // ניקוי שם המוצר מה-CSV מרווחים מיותרים (ה-trim המכריע!)
         const pName = p.name.toLowerCase().trim();
         const pNameFixed = fix(pName);
-        
-        // הבדיקה הדו-כיוונית שאישרת שעבדה
         return pNameFixed.includes(qFixed) || pNameFixed.includes(qShort) || qFixed.includes(pNameFixed);
     });
 
     container.innerHTML = filtered.map(p => {
-        // טיפול בתבניות אלומיניום
         let fallback = (p.name.includes("תבנית") || p.name.includes("אלומיניום")) ? "images/bake1.jpeg" : "images/logo.jpg";
-        
-        // שימוש ב-encodeURIComponent כדי למנוע שבירת לינקים בגלל רווחים או גרשיים
         const imgName = p.name.trim();
         return `
             <div class="product-card">
                 <img src="images/products/${encodeURIComponent(imgName)}.jpg" onerror="this.src='${fallback}'" onclick="openImg(this.src)">
                 <h4>${p.name}</h4>
                 <div style="color:var(--primary); font-weight:bold;">₪${p.price}</div>
-                <button class="add-btn" onclick="addToCart('${p.name.replace(/'/g, "\\'")}', ${p.price})">הוסף לסל +</button>
+                <button class="add-btn" onclick="addToCart('${p.name.replace(/'/g, "\\'")}', '${p.price}')">הוסף לסל +</button>
             </div>`;
     }).join('');
 }
+
+// פונקציה לשליחה לוואטסאפ - הייתה חסרה!
+function sendToWhatsApp() {
+    const currentCart = JSON.parse(localStorage.getItem('cart')) || [];
+    const name = document.getElementById('cust-name-idx').value.trim();
+    const phone = document.getElementById('cust-phone-idx').value.trim();
+    const location = document.getElementById('cust-loc-idx').value.trim();
+
+    if (currentCart.length === 0) return alert("הסל ריק");
+    if (!name || !phone) return alert("בבקשה מלא שם ומספר טלפון");
+
+    let msg = "*הזמנה חדשה מאתר Up סטוק*\n--------------------------\n";
+    msg += `👤 *שם:* ${name}\n📞 *טלפון:* ${phone}\n`;
+    if (location) msg += `📍 *מיקום:* ${location}\n`;
+    msg += "--------------------------\n";
+
+    let totalOrder = 0;
+    currentCart.forEach(i => {
+        let p = extractPrice(i.price);
+        let q = i.qty || 1;
+        let sub = p * q;
+        totalOrder += sub;
+        msg += `• ${i.name} (x${q}) - ₪${sub.toFixed(2)}\n`;
+    });
+
+    msg += "--------------------------\n";
+    msg += `💰 *סה"כ לתשלום: ₪${totalOrder.toFixed(2)}*`;
+
+    window.location.href = "https://wa.me/972549397753?text=" + encodeURIComponent(msg);
+}
+
 window.onload = function() {
     loadInventory();
-    updateUI();
+    updateUI(); // טוען את מצב העגלה מיד כשהדף עולה
 };
 </script>
 </body>
 </html>
-
