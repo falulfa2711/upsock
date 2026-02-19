@@ -13,7 +13,6 @@
         }
         body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--light); margin: 0; padding: 0; text-align: center; }
         
-        /* שורת העגלה בראש הדף */
         .cart-sticky-header {
             position: sticky; top: 0; z-index: 2000;
             background: var(--primary); color: white; padding: 12px;
@@ -21,13 +20,11 @@
             gap: 15px; cursor: pointer; font-weight: bold; box-shadow: 0 2px 10px rgba(0,0,0,0.2);
         }
 
-        /* תפריט ניווט */
         .nav-bar { background: white; padding: 15px; display: flex; justify-content: center; gap: 30px; border-bottom: 1px solid #eee; }
         .nav-bar a { text-decoration: none; color: var(--dark); font-weight: 600; }
 
         h1 { color: var(--dark); margin-top: 30px; }
 
-        /* גריד מוצרים */
         .products-container {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
@@ -42,7 +39,6 @@
             box-shadow: 0 4px 10px rgba(0,0,0,0.1); transition: 0.2s;
             display: flex; flex-direction: column; justify-content: space-between;
         }
-        .product-card:hover { transform: translateY(-5px); }
         .product-card img { width: 100%; height: 180px; object-fit: contain; border-radius: 8px; cursor: pointer; }
         .product-card h4 { margin: 10px 0 5px; font-size: 1.1em; color: var(--dark); height: 2.4em; overflow: hidden; }
         .price { color: var(--primary); font-weight: bold; font-size: 1.2em; margin-bottom: 10px; }
@@ -53,17 +49,11 @@
             width: 100%; font-weight: bold; transition: 0.3s;
         }
 
-        /* מודאלים */
         .modal { display: none; position: fixed; z-index: 5000; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); justify-content: center; align-items: center; }
         .modal-cart-content { background: white; width: 90%; max-width: 450px; border-radius: 20px; padding: 25px; text-align: right; color: #1a1a1a; }
-        .img-full { max-width: 90%; max-height: 85%; border-radius: 10px; border: 3px solid white; }
         .cart-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; }
         
-        .clear-btn {
-            background: none; border: none; color: #888; cursor: pointer; 
-            font-size: 0.9em; margin-top: 15px; text-decoration: underline;
-        }
-        .clear-btn:hover { color: var(--primary); }
+        .clear-btn { background: none; border: none; color: #888; cursor: pointer; font-size: 0.9em; text-decoration: underline; }
     </style>
 </head>
 <body>
@@ -83,7 +73,7 @@
     <div id="promos-container" class="products-container"></div>
 
     <div id="imageModal" class="modal" onclick="closeModal()">
-        <img class="img-full" id="imgFull">
+        <img style="max-width: 90%; max-height: 85%; border-radius: 10px;" id="imgFull">
     </div>
 
     <div id="cartModal" class="modal" onclick="if(event.target == this) toggleCart()">
@@ -103,17 +93,13 @@
     </div>
 
     <script>
-        let cart = JSON.parse(localStorage.getItem('cart')) || [];
-
         function updateUI() {
-            cart = JSON.parse(localStorage.getItem('cart')) || [];
+            const cart = JSON.parse(localStorage.getItem('cart')) || [];
             let count = 0; let total = 0;
             
             const itemsHtml = cart.map(i => {
-                // תיקון המספרים: מחפש את כל המספרים ולוקח את האחרון (למשל מ-"2 ב-22" יקח 22)
                 const matches = i.price.match(/\d+(\.\d+)?/g);
                 const price = matches ? parseFloat(matches[matches.length - 1]) : 0;
-                
                 let qty = i.qty || 1;
                 count += qty; total += (price * qty);
                 return `<div class="cart-item">
@@ -152,11 +138,11 @@
                             </div>`;
                     }
                 });
-            } catch (error) { console.error("שגיאה:", error); }
+            } catch (e) { console.error("Error loading CSV", e); }
         }
 
         function addToCart(name, price) {
-            cart = JSON.parse(localStorage.getItem('cart')) || [];
+            let cart = JSON.parse(localStorage.getItem('cart')) || [];
             const existing = cart.find(i => i.name === name);
             if (existing) { existing.qty++; } 
             else { cart.push({ name: name, price: price, qty: 1 }); }
@@ -170,7 +156,7 @@
         }
 
         function clearCart() {
-            if(confirm("לרוקן את כל הסל?")) {
+            if(confirm("לרוקן את הסל?")) {
                 localStorage.removeItem('cart');
                 updateUI();
             }
@@ -181,32 +167,29 @@
             modal.style.display = (modal.style.display === 'flex') ? 'none' : 'flex';
             if (modal.style.display === 'flex') updateUI();
         }
-function sendToWhatsApp() {
-    const cart = JSON.parse(localStorage.getItem('cart')) || [];
-    if (cart.length === 0) return alert("הסל ריק");
 
-    let msg = "הזמנה חדשה מאתר Up סטוק:\n";
-    msg += "--------------------------\n";
-    let totalOrder = 0;
+        function sendToWhatsApp() {
+            const currentCart = JSON.parse(localStorage.getItem('cart')) || [];
+            if (currentCart.length === 0) return alert("הסל ריק");
 
-    cart.forEach(i => {
-        // לוגיקה לזיהוי המחיר - לוקח את המספר האחרון (למשל 22 מתוך "2 ב-22")
-        const matches = i.price.match(/\d+(\.\d+)?/g);
-        const price = matches ? parseFloat(matches[matches.length - 1]) : 0;
-        const qty = i.qty || 1;
-        const lineTotal = price * qty;
-        totalOrder += lineTotal;
+            let msg = "הזמנה חדשה מאתר Up סטוק:\n--------------------------\n";
+            let totalOrder = 0;
 
-        msg += `• ${i.name}\n  כמות: ${qty} | סה"כ: ₪${lineTotal.toFixed(2)}\n`;
-    });
+            currentCart.forEach(i => {
+                const matches = i.price.match(/\d+(\.\d+)?/g);
+                const price = matches ? parseFloat(matches[matches.length - 1]) : 0;
+                const qty = i.qty || 1;
+                const lineTotal = price * qty;
+                totalOrder += lineTotal;
+                msg += `• ${i.name}\n  כמות: ${qty} | סה"כ: ₪${lineTotal.toFixed(2)}\n`;
+            });
 
-    msg += "--------------------------\n";
-    msg += `💰 סה"כ לתשלום: ₪${totalOrder.toFixed(2)}`;
+            msg += "--------------------------\n";
+            msg += `💰 סה"כ לתשלום: ₪${totalOrder.toFixed(2)}`;
 
-    // המספר המעודכן שלך
-    const phoneNumber = "972549397753"; 
-    window.location.href = "https://wa.me/" + phoneNumber + "?text=" + encodeURIComponent(msg);
-}
+            const phoneNumber = "972549397753"; 
+            window.location.href = "https://wa.me/" + phoneNumber + "?text=" + encodeURIComponent(msg);
+        }
 
         function openModal(src) { document.getElementById('imageModal').style.display = "flex"; document.getElementById('imgFull').src = src; }
         function closeModal() { document.getElementById('imageModal').style.display = "none"; }
@@ -215,5 +198,3 @@ function sendToWhatsApp() {
     </script>
 </body>
 </html>
-
-
