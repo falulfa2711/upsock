@@ -229,7 +229,11 @@ function filterProducts() {
     const status = document.getElementById('search-status');
     if (!q || q.length < 2) { container.innerHTML = ""; status.innerText = ""; return; }
 
-    const filtered = allProducts.filter(p => p.name.toLowerCase().includes(q));
+    const filtered = allProducts.filter(p => {
+    const productName = p.name.toLowerCase();
+    // בודק אם השם מכיל את החיפוש (קנקן -> קנקנים) או שהחיפוש מכיל את השם (קנקנים -> קנקן)
+    return productName.includes(q) || q.includes(productName);
+});
     status.innerText = `נמצאו ${filtered.length} מוצרים:`;
     container.innerHTML = filtered.map(p => `
         <div class="product-card">
@@ -285,3 +289,4 @@ window.onload = function() {
 </script>
 </body>
 </html>
+
