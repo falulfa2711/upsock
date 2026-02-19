@@ -287,6 +287,7 @@
 <script>
 let allProducts = [];
 let cart = [];
+let promoProducts = []; // כאן יישמרו נתוני המבצעים והתמונות
 
 function openImg(src) {
     document.getElementById('viewImg').src = src;
@@ -302,6 +303,23 @@ function extractPrice(priceValue) {
     }
     let cleaned = parseFloat(String(priceValue).replace(/[^\d.]/g, ''));
     return isNaN(cleaned) ? 0 : cleaned;
+}
+
+// פונקציה לטעינת המבצעים - לוקחת את השם והתמונה מה-CSV של המבצעים
+async function loadPromoData() {
+    try {
+        const response = await fetch('stock_promos.csv?t=' + Date.now());
+        const data = await response.text();
+        const rows = data.split('\n').slice(1);
+        promoProducts = rows.map(row => {
+            const cols = row.split(',');
+            // לפי הקובץ שלך: שם בעמודה 1, תמונה בעמודה 3
+            if (cols.length >= 3) {
+                return { name: cols[0].trim(), image: cols[2].trim() };
+            }
+            return null;
+        }).filter(p => p !== null);
+    } catch (e) { console.error("Promo load error"); }
 }
 
 async function loadInventory() {
@@ -366,22 +384,44 @@ function clearCart() {
     }
 }
 
+// פונקציית החיפוש המתוקנת (כולל יחיד/רבים ותמונות)
 function filterProducts() {
     const q = document.getElementById('productSearch').value.toLowerCase().trim();
     const container = document.getElementById('dynamic-products');
     const status = document.getElementById('search-status');
+    
     if (!q || q.length < 2) { container.innerHTML = ""; status.innerText = ""; return; }
 
-    const filtered = allProducts.filter(p => p.name.toLowerCase().includes(q));
+    // פתרון יחיד/רבים: מחפש התאמה דו-כיוונית
+    const filtered = allProducts.filter(p => {
+        const n = p.name.toLowerCase();
+        // אם שם המוצר מכיל את החיפוש (בלון -> בלונים) 
+        // או שהחיפוש מכיל את שם המוצר (בלונים -> בלון)
+        return n.includes(q) || q.includes(n);
+    });
+
     status.innerText = `נמצאו ${filtered.length} מוצרים:`;
-    container.innerHTML = filtered.map(p => `
-        <div class="product-card">
-            <img src="images/products/${p.name}.jpg" onerror="this.src='images/logo.jpg'">
-            <h4>${p.name}</h4>
-            <div style="color:var(--primary); font-weight:bold; font-size:1.2em; margin-bottom:10px;">₪${p.price}</div>
-            <button class="add-btn" onclick="addToCart('${p.name.replace(/'/g, "\\'")}', '${p.price}')">הוסף לסל +</button>
-        </div>
-    `).join('');
+
+    container.innerHTML = filtered.map(p => {
+        // בודק אם יש תמונה במבצעים למוצר הספציפי הזה
+        const promoMatch = promoProducts.find(promo => p.name.includes(promo.name) || promo.name.includes(p.name));
+        let imageSrc = promoMatch ? promoMatch.image : `images/products/${p.name}.jpg`;
+        
+        // הגדרת תמונת גיבוי לפי מחלקה (תבניות)
+        let fallback = "images/logo.jpg";
+        if (p.name.includes("תבנית") || p.name.includes("אלומיניום")) {
+            fallback = "images/bake1.jpeg";
+        }
+
+        return `
+            <div class="product-card">
+                <img src="${imageSrc}" onerror="this.src='${fallback}'" onclick="openImg(this.src)">
+                <h4>${p.name}</h4>
+                <div style="color:var(--primary); font-weight:bold; font-size:1.2em; margin-bottom:10px;">₪${p.price}</div>
+                <button class="add-btn" onclick="addToCart('${p.name.replace(/'/g, "\\'")}', '${p.price}')">הוסף לסל +</button>
+            </div>
+        `;
+    }).join('');
 }
 
 function toggleCart() {
@@ -423,6 +463,7 @@ function sendToWhatsApp() {
 
 window.onload = function() {
     loadInventory();
+    loadPromoData(); // טוען את נתוני המבצעים כדי שהתמונות יעבדו בחיפוש
     updateUI();
 };
 </script>
@@ -430,4 +471,5 @@ window.onload = function() {
 </html>
 </body>
 </html>
+
 
