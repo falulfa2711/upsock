@@ -232,9 +232,12 @@ function clearCart() {
 
 // תיקון הריצוד המרכזי כאן ב-onerror
 function filterProducts() {
-    const q = document.getElementById('productSearch').value.toLowerCase().trim();
+    const input = document.getElementById('productSearch');
     const container = document.getElementById('dynamic-products');
     const status = document.getElementById('search-status');
+
+    if (!input || !container) return;
+    const q = input.value.toLowerCase().trim();
 
     if (!q || q.length < 2) { 
         container.innerHTML = ""; 
@@ -242,19 +245,21 @@ function filterProducts() {
         return; 
     }
 
+    // 1. פונקציית נרמול: הופכת אותיות סופיות לרגילות כדי ש"בלון" ו"בלונ" יהיו זהים
+    const normalize = (str) => str.replace(/ך/g, 'כ').replace(/ם/g, 'מ').replace(/ן/g, 'נ').replace(/ף/g, 'פ').replace(/ץ/g, 'צ');
+    
+    // 2. רגקס לניקוי סיומות (ימ, ות, ה, י) - שים לב שזה "ימ" כי הנרמול הופך ם ל-מ
+    const suffixRegex = /(ימ|ות|י|ה)$/;
+
     const filtered = allProducts.filter(p => {
-        const pName = p.name.toLowerCase();
-        const searchVal = q.toLowerCase();
+        const pNameNormalized = normalize(p.name.toLowerCase());
+        const qNormalized = normalize(q);
+        const rootSearch = qNormalized.replace(suffixRegex, "");
 
-        // ניקוי בסיסי של סיומות מהחיפוש
-        const rootSearch = searchVal.replace(/(ים|ות|י|ה|ים|ים|ונים|ותים|ים|ים|ות)$/, "");
-
-        // בדיקה אם השם מכיל את החיפוש, או החיפוש מכיל את השם, 
-        // או שהשורש של החיפוש נמצא בשם המוצר
-        return pName.includes(searchVal) || 
-               searchVal.includes(pName) || 
-               pName.includes(rootSearch) ||
-               (rootSearch && pName.startsWith(rootSearch));
+        // בדיקה: האם השם מכיל את החיפוש או את השורש של החיפוש
+        return pNameNormalized.includes(qNormalized) || 
+               qNormalized.includes(pNameNormalized) || 
+               pNameNormalized.includes(rootSearch);
     });
 
     if (status) status.innerText = `נמצאו ${filtered.length} מוצרים:`;
@@ -268,7 +273,6 @@ function filterProducts() {
         </div>
     `).join('');
 }
-
 // שים לב - כאן התיקון לסוף הקובץ
 window.onload = function() {
     loadInventory();
@@ -278,6 +282,7 @@ window.onload = function() {
 </script>
 </body>
 </html>
+
 
 
 
