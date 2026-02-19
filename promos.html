@@ -13,47 +13,19 @@
         }
         body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--light); margin: 0; padding: 0; text-align: center; }
         
-        /* תפריט ניווט עליון */
+        /* שורת העגלה בראש הדף */
+        .cart-sticky-header {
+            position: sticky; top: 0; z-index: 2000;
+            background: var(--primary); color: white; padding: 12px;
+            display: flex; justify-content: center; align-items: center;
+            gap: 15px; cursor: pointer; font-weight: bold; box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        /* תפריט ניווט */
         .nav-bar { background: white; padding: 15px; display: flex; justify-content: center; gap: 30px; border-bottom: 1px solid #eee; }
         .nav-bar a { text-decoration: none; color: var(--dark); font-weight: 600; }
 
         h1 { color: var(--dark); margin-top: 30px; }
-
-        /* כפתור עגלה צף */
-        .floating-cart {
-            position: fixed;
-            top: 30px;
-            left: 30px;
-            background: var(--primary);
-            color: white;
-            width: 70px;
-            height: 70px;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            cursor: pointer;
-            z-index: 4000;
-            text-decoration: none;
-            transition: transform 0.2s;
-        }
-        .floating-cart:hover { transform: scale(1.1); }
-        .cart-badge {
-            position: absolute;
-            top: 0;
-            right: 0;
-            background: var(--dark);
-            color: white;
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            font-size: 0.8em;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            border: 2px solid white;
-        }
 
         /* גריד מוצרים */
         .products-container {
@@ -71,7 +43,6 @@
             display: flex; flex-direction: column; justify-content: space-between;
         }
         .product-card:hover { transform: translateY(-5px); }
-
         .product-card img { width: 100%; height: 180px; object-fit: contain; border-radius: 8px; cursor: pointer; }
         .product-card h4 { margin: 10px 0 5px; font-size: 1.1em; color: var(--dark); height: 2.4em; overflow: hidden; }
         .price { color: var(--primary); font-weight: bold; font-size: 1.2em; margin-bottom: 10px; }
@@ -82,57 +53,74 @@
             width: 100%; font-weight: bold; transition: 0.3s;
         }
 
-        /* מודאל הגדלת תמונה */
-        .modal {
-            display: none; position: fixed; z-index: 5000;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9); justify-content: center; align-items: center;
-        }
-        .modal-content { max-width: 90%; max-height: 85%; border-radius: 10px; border: 3px solid white; }
-        .close-modal { position: absolute; top: 20px; right: 30px; color: white; font-size: 50px; cursor: pointer; }
+        /* מודאלים (הגדלת תמונה + עגלה) */
+        .modal { display: none; position: fixed; z-index: 5000; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); justify-content: center; align-items: center; }
+        .modal-cart-content { background: white; width: 90%; max-width: 450px; border-radius: 20px; padding: 25px; text-align: right; color: #1a1a1a; }
+        .img-full { max-width: 90%; max-height: 85%; border-radius: 10px; border: 3px solid white; }
+        .cart-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; }
     </style>
 </head>
 <body>
 
-    <a href="index.html?openCart=true" class="floating-cart" title="עבור לסל הקניות">
-        <span style="font-size: 30px;">🛒</span>
-        <span id="cart-count" class="cart-badge">0</span>
-    </a>
+    <div class="cart-sticky-header" onclick="toggleCart()">
+        🛒 מוצרים בסל: <span id="cart-count">0</span> | סה"כ: ₪<span id="cart-total-header">0.00</span>
+    </div>
 
     <div class="nav-bar">
-    <a href="index.html">🏠 בית</a>
-    <a href="promos.html" style="color: #ed1c24; font-weight: 800;">🔥 דילים שווים</a>
-    <a href="reviews.html">⭐ חוות דעת</a>
-    <a href="contact.html">📞 צור קשר</a>
-</div>
+        <a href="index.html">🏠 בית</a>
+        <a href="promos.html" style="color: #ed1c24; font-weight: 800;">🔥 דילים שווים</a>
+        <a href="reviews.html">⭐ חוות דעת</a>
+        <a href="contact.html">📞 צור קשר</a>
+    </div>
 
     <h1>מבצעי החנות</h1>
-    <div id="promos-container" class="products-container">
-        </div>
+    <div id="promos-container" class="products-container"></div>
 
     <div id="imageModal" class="modal" onclick="closeModal()">
-        <span class="close-modal">&times;</span>
-        <img class="modal-content" id="imgFull">
+        <img class="img-full" id="imgFull">
+    </div>
+
+    <div id="cartModal" class="modal" onclick="if(event.target == this) toggleCart()">
+        <div class="modal-cart-content" onclick="event.stopPropagation()">
+            <h2 style="margin:0;">הסל שלי 🛍️</h2>
+            <div id="cart-items-list" style="max-height: 300px; overflow-y: auto; margin-top: 15px;"></div>
+            <div style="display: flex; justify-content: space-between; font-size: 1.5em; font-weight: bold; border-top: 2px solid #eee; margin-top: 20px; padding-top: 10px;">
+                <span>סה"כ:</span>
+                <span>₪<span id="cart-total-modal">0.00</span></span>
+            </div>
+            <button onclick="sendToWhatsApp()" style="background: #25d366; color: white; border: none; width: 100%; padding: 15px; border-radius: 10px; font-size: 1.2em; font-weight: bold; cursor: pointer; margin-top: 20px;">שלח הזמנה לוואטסאפ</button>
+            <button onclick="toggleCart()" style="width: 100%; background: none; border: none; color: #999; cursor: pointer; margin-top: 15px;">סגור</button>
+        </div>
     </div>
 
     <script>
         let cart = JSON.parse(localStorage.getItem('cart')) || [];
 
-        // עדכון התצוגה של הכפתור הצף
-        function updateCartBadge() {
-            let count = 0;
-            cart.forEach(item => count += (item.qty || 1));
+        function updateUI() {
+            let count = 0; let total = 0;
+            const itemsHtml = cart.map(i => {
+                let price = parseFloat(i.price.replace(/[^\d.]/g, '')) || 0;
+                let qty = i.qty || 1;
+                count += qty; total += (price * qty);
+                return `<div class="cart-item">
+                    <span>₪${(price * qty).toFixed(2)}</span>
+                    <span><strong>${i.name}</strong> (x${qty})</span>
+                </div>`;
+            }).join('');
+
             document.getElementById('cart-count').innerText = count;
+            document.getElementById('cart-total-header').innerText = total.toFixed(2);
+            document.getElementById('cart-total-modal').innerText = total.toFixed(2);
+            document.getElementById('cart-items-list').innerHTML = itemsHtml || "הסל ריק";
         }
 
-        // טעינת המבצעים מהקובץ
         async function loadPromos() {
             try {
                 const response = await fetch('stock_promos.csv?t=' + Date.now());
                 const data = await response.text();
                 const rows = data.split('\n').slice(1);
                 const container = document.getElementById('promos-container');
-                container.innerHTML = ""; // ניקוי לפני טעינה
+                container.innerHTML = "";
                 
                 rows.forEach(row => {
                     if (!row.trim()) return;
@@ -141,68 +129,49 @@
                         const name = cols[0].trim();
                         const promo = cols[1].trim();
                         const imgSrc = cols[2].trim();
-
                         container.innerHTML += `
                             <div class="product-card">
                                 <img src="${imgSrc}" onclick="openModal('${imgSrc}')" onerror="this.src='images/placeholder.jpg'">
                                 <h4>${name}</h4>
                                 <div class="price">${promo}</div>
                                 <button class="add-btn" onclick="addToCart('${name.replace(/'/g, "\\'")}', '${promo}')">הוסף לסל +</button>
-                            </div>
-                        `;
+                            </div>`;
                     }
                 });
-            } catch (error) {
-                console.error("שגיאה בטעינת המבצעים:", error);
-            }
+            } catch (error) { console.error("שגיאה:", error); }
         }
 
-        // פונקציית הוספה לסל
         function addToCart(name, price) {
-            // טעינה מחדש מהזיכרון ליתר ביטחון
             cart = JSON.parse(localStorage.getItem('cart')) || [];
-            
             const existing = cart.find(i => i.name === name);
-            if (existing) {
-                existing.qty++;
-            } else {
-                cart.push({ name: name, price: price, qty: 1 });
-            }
-            
-            // שמירה
+            if (existing) { existing.qty++; } 
+            else { cart.push({ name: name, price: price, qty: 1 }); }
             localStorage.setItem('cart', JSON.stringify(cart));
+            updateUI();
             
-            // עדכון הכפתור הצף מיד
-            updateCartBadge();
-            
-            // משוב ויזואלי על הכפתור
             const btn = event.target;
-            const originalText = btn.innerText;
             btn.innerText = "נוסף לסל ✓";
             btn.style.background = "var(--success)";
-            setTimeout(() => {
-                btn.innerText = originalText;
-                btn.style.background = "var(--primary)";
-            }, 800);
+            setTimeout(() => { btn.innerText = "הוסף לסל +"; btn.style.background = "var(--primary)"; }, 800);
         }
 
-        // הגדלת תמונה
-        function openModal(src) {
-            document.getElementById('imageModal').style.display = "flex";
-            document.getElementById('imgFull').src = src;
+        function toggleCart() {
+            const modal = document.getElementById('cartModal');
+            modal.style.display = (modal.style.display === 'flex') ? 'none' : 'flex';
+            if (modal.style.display === 'flex') updateUI();
         }
 
-        function closeModal() {
-            document.getElementById('imageModal').style.display = "none";
+        function sendToWhatsApp() {
+            if (cart.length === 0) return alert("הסל ריק");
+            let msg = "הזמנה חדשה (מבצעים) מאתר Up סטוק:\n";
+            cart.forEach(i => msg += `- ${i.name} (כמות: ${i.qty})\n`);
+            window.location.href = "https://wa.me/972508810105?text=" + encodeURIComponent(msg);
         }
 
-        // הפעלה בטעינה
-        window.onload = function() {
-            loadPromos();
-            updateCartBadge();
-        };
+        function openModal(src) { document.getElementById('imageModal').style.display = "flex"; document.getElementById('imgFull').src = src; }
+        function closeModal() { document.getElementById('imageModal').style.display = "none"; }
+
+        window.onload = function() { loadPromos(); updateUI(); };
     </script>
 </body>
 </html>
-
-
