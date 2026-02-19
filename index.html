@@ -273,15 +273,28 @@ function filterProducts() {
         </div>
     `).join('');
 }
-// שים לב - כאן התיקון לסוף הקובץ
+function toggleCart() {
+    const cartModal = document.getElementById('cart-modal');
+    if (cartModal) {
+        // פותח או סוגר את חלון העגלה
+        if (cartModal.style.display === 'none' || cartModal.style.display === '') {
+            cartModal.style.display = 'block';
+            if (typeof updateUI === 'function') updateUI(); 
+        } else {
+            cartModal.style.display = 'none';
+        }
+    }
+}
+
 window.onload = function() {
-    loadInventory();
+    if (typeof loadInventory === 'function') loadInventory();
     cart = JSON.parse(localStorage.getItem('cart')) || [];
-    updateUI();
+    if (typeof updateUI === 'function') updateUI();
 };
 </script>
 </body>
 </html>
+
 
 
 
