@@ -223,22 +223,51 @@ function clearCart() {
     }
 }
 
+// פונקציית החיפוש המעודכנת בלבד:
 function filterProducts() {
-    const q = document.getElementById('productSearch').value.toLowerCase().trim();
+    const qRaw = document.getElementById('productSearch').value.toLowerCase().trim();
     const container = document.getElementById('dynamic-products');
     const status = document.getElementById('search-status');
-    if (!q || q.length < 2) { container.innerHTML = ""; status.innerText = ""; return; }
 
-    const filtered = allProducts.filter(p => p.name.toLowerCase().includes(q));
+    if (!qRaw || qRaw.length < 2) { 
+        container.innerHTML = ""; 
+        status.innerText = ""; 
+        return; 
+    }
+
+    // נירמול אותיות סופיות
+    function fix(s) { 
+        return s.replace(/ך/g,'כ').replace(/ם/g,'מ').replace(/ן/g,'נ').replace(/ף/g,'פ').replace(/ץ/g,'צ'); 
+    }
+
+    const qFixed = fix(qRaw);
+    let qShort = qFixed;
+    if (qFixed.length > 3) {
+        if (qFixed.endsWith('ימ') || qFixed.endsWith('ות')) {
+            qShort = qFixed.slice(0, -2);
+        }
+    }
+
+    const filtered = allProducts.filter(p => {
+        const pNameFixed = fix(p.name.toLowerCase().trim());
+        return pNameFixed.includes(qFixed) || pNameFixed.includes(qShort) || qFixed.includes(pNameFixed);
+    });
+
     status.innerText = `נמצאו ${filtered.length} מוצרים:`;
-    container.innerHTML = filtered.map(p => `
-        <div class="product-card">
-            <img src="images/products/${p.name}.jpg" onerror="this.src='images/logo.jpg'">
-            <h4>${p.name}</h4>
-            <div style="color:var(--primary); font-weight:bold; font-size:1.2em; margin-bottom:10px;">₪${p.price}</div>
-            <button class="add-btn" onclick="addToCart('${p.name.replace(/'/g, "\\'")}', '${p.price}')">הוסף לסל +</button>
-        </div>
-    `).join('');
+
+    container.innerHTML = filtered.map(p => {
+        // גיבוי תמונה לתבניות אלומיניום
+        let fallback = (p.name.includes("תבנית") || p.name.includes("אלומיניום")) ? "images/bake1.jpeg" : "images/logo.jpg";
+        
+        return `
+            <div class="product-card">
+                <img src="images/products/${encodeURIComponent(p.name)}.jpg" onerror="this.src='${fallback}'" onclick="openImg(this.src)">
+                <h4>${p.name}</h4>
+                <div style="color:var(--primary); font-weight:bold; font-size:1.2em; margin-bottom:10px;">₪${p.price}</div>
+                <button class="add-btn" onclick="addToCart('${p.name.replace(/'/g, "\\'")}', '${p.price}')">הוסף לסל +</button>
+            </div>
+        `;
+    }).join('');
 }
 
 function toggleCart() {
