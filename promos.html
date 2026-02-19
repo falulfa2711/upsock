@@ -53,11 +53,17 @@
             width: 100%; font-weight: bold; transition: 0.3s;
         }
 
-        /* מודאלים (הגדלת תמונה + עגלה) */
-        .modal { display: none; position: fixed; z-index: 5000; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); justify-content: center; align-items: center; }
+        /* מודאלים */
+        .modal { display: none; position: fixed; z-index: 5000; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); justify-content: center; align-items: center; }
         .modal-cart-content { background: white; width: 90%; max-width: 450px; border-radius: 20px; padding: 25px; text-align: right; color: #1a1a1a; }
         .img-full { max-width: 90%; max-height: 85%; border-radius: 10px; border: 3px solid white; }
         .cart-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; }
+        
+        .clear-btn {
+            background: none; border: none; color: #888; cursor: pointer; 
+            font-size: 0.9em; margin-top: 15px; text-decoration: underline;
+        }
+        .clear-btn:hover { color: var(--primary); }
     </style>
 </head>
 <body>
@@ -82,7 +88,10 @@
 
     <div id="cartModal" class="modal" onclick="if(event.target == this) toggleCart()">
         <div class="modal-cart-content" onclick="event.stopPropagation()">
-            <h2 style="margin:0;">הסל שלי 🛍️</h2>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h2 style="margin:0;">הסל שלי 🛍️</h2>
+                <button onclick="clearCart()" class="clear-btn">רוקן סל</button>
+            </div>
             <div id="cart-items-list" style="max-height: 300px; overflow-y: auto; margin-top: 15px;"></div>
             <div style="display: flex; justify-content: space-between; font-size: 1.5em; font-weight: bold; border-top: 2px solid #eee; margin-top: 20px; padding-top: 10px;">
                 <span>סה"כ:</span>
@@ -97,9 +106,14 @@
         let cart = JSON.parse(localStorage.getItem('cart')) || [];
 
         function updateUI() {
+            cart = JSON.parse(localStorage.getItem('cart')) || [];
             let count = 0; let total = 0;
+            
             const itemsHtml = cart.map(i => {
-                let price = parseFloat(i.price.replace(/[^\d.]/g, '')) || 0;
+                // תיקון המספרים: מחפש את כל המספרים ולוקח את האחרון (למשל מ-"2 ב-22" יקח 22)
+                const matches = i.price.match(/\d+(\.\d+)?/g);
+                const price = matches ? parseFloat(matches[matches.length - 1]) : 0;
+                
                 let qty = i.qty || 1;
                 count += qty; total += (price * qty);
                 return `<div class="cart-item">
@@ -150,9 +164,16 @@
             updateUI();
             
             const btn = event.target;
-            btn.innerText = "נוסף לסל ✓";
+            btn.innerText = "נוסף ✓";
             btn.style.background = "var(--success)";
             setTimeout(() => { btn.innerText = "הוסף לסל +"; btn.style.background = "var(--primary)"; }, 800);
+        }
+
+        function clearCart() {
+            if(confirm("לרוקן את כל הסל?")) {
+                localStorage.removeItem('cart');
+                updateUI();
+            }
         }
 
         function toggleCart() {
@@ -163,7 +184,7 @@
 
         function sendToWhatsApp() {
             if (cart.length === 0) return alert("הסל ריק");
-            let msg = "הזמנה חדשה (מבצעים) מאתר Up סטוק:\n";
+            let msg = "הזמנה חדשה מאתר Up סטוק:\n";
             cart.forEach(i => msg += `- ${i.name} (כמות: ${i.qty})\n`);
             window.location.href = "https://wa.me/972508810105?text=" + encodeURIComponent(msg);
         }
@@ -175,4 +196,3 @@
     </script>
 </body>
 </html>
-
