@@ -228,47 +228,54 @@ function filterProducts() {
     const container = document.getElementById('dynamic-products');
     const status = document.getElementById('search-status');
 
+    // אם החיפוש ריק או קצר מדי - מנקים את המסך
     if (!qRaw || qRaw.length < 2) { 
         container.innerHTML = ""; 
         status.innerText = ""; 
         return; 
     }
 
+    // פונקציית תיקון אותיות סופיות
     function fix(s) { 
         return s.replace(/ך/g,'כ').replace(/ם/g,'מ').replace(/ן/g,'נ').replace(/ף/g,'פ').replace(/ץ/g,'צ'); 
     }
 
     const qFixed = fix(qRaw);
-    // פירוק למילים והתעלמות ממילים נפוצות שלא תמיד ב-CSV
-    const ignoreWords = ["בניחוח", "של", "עם"];
-    const queryWords = qFixed.split(' ').filter(w => w.length > 1 && !ignoreWords.includes(w));
+    const queryWords = qFixed.split(' ').filter(w => w.length > 0);
 
+    // אלגוריתם חיפוש מרחיב: מציג מוצר אם *לפחות אחת* ממילות החיפוש מופיעה בשם שלו
     const filtered = allProducts.filter(p => {
         const pNameFixed = fix(p.name.toLowerCase().trim());
-        // מוצא אם כל מילות החיפוש החשובות קיימות בשם
-        return queryWords.every(word => pNameFixed.includes(word));
+        return queryWords.some(word => pNameFixed.includes(word));
     });
+
+    if (filtered.length === 0) {
+        status.innerText = "לא נמצאו מוצרים.";
+        container.innerHTML = "";
+        return;
+    }
 
     status.innerText = `נמצאו ${filtered.length} מוצרים:`;
 
-   container.innerHTML = filtered.map(p => {
-    // 1. מנקה רווחים מיותרים מהתחלה ומהסוף
-    // 2. הופך רווחים כפולים (אם יש) לרווח אחד
-    const cleanName = p.name.trim().replace(/\s+/g, ' ');
-    
-    let fallback = (p.name.includes("תבנית") || p.name.includes("אלומיניום")) ? "images/bake1.jpeg" : "images/logo.jpg";
-    
-    return `
-        <div class="product-card">
-            <img src="images1/${cleanName}.jpg" 
-                 onerror="this.onerror=null; this.src='images/products/${cleanName}.jpg'; this.onerror=function(){this.src='${fallback}'};" 
-                 onclick="openImg(this.src)">
-            <h4>${p.name}</h4>
-            <div style="color:var(--primary); font-weight:bold; font-size:1.2em; margin-bottom:10px;">₪${p.price}</div>
-            <button class="add-btn" onclick="addToCart('${p.name.replace(/'/g, "\\'")}', '${p.price}')">הוסף לסל +</button>
-        </div>
-    `;
-}).join('');
+    container.innerHTML = filtered.map(p => {
+        // ניקוי שם המוצר מרווחים כפולים לטובת שם הקובץ
+        const cleanName = p.name.trim().replace(/\s+/g, ' ');
+        
+        // הגדרת תמונת גיבוי (תבניות אלומיניום או לוגו)
+        let fallback = (p.name.includes("תבנית") || p.name.includes("אלומיניום")) ? "images/bake1.jpeg" : "images/logo.jpg";
+        
+        return `
+            <div class="product-card">
+                <img src="images1/${cleanName}.jpg" 
+                     onerror="this.onerror=null; this.src='images/products/${cleanName}.jpg'; this.onerror=function(){this.src='${fallback}'};" 
+                     onclick="openImg(this.src)">
+                <h4>${p.name}</h4>
+                <div style="color:var(--primary); font-weight:bold; font-size:1.2em; margin-bottom:10px;">₪${p.price}</div>
+                <button class="add-btn" onclick="addToCart('${p.name.replace(/'/g, "\\'")}', '${p.price}')">הוסף לסל +</button>
+            </div>
+        `;
+    }).join('');
+}
 function toggleCart() {
     const m = document.getElementById('cartModal');
     m.style.display = (m.style.display === 'block') ? 'none' : 'block';
@@ -313,6 +320,7 @@ window.onload = function() {
 </script>
 </body>
 </html>
+
 
 
 
