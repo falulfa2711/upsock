@@ -239,33 +239,33 @@ function filterProducts() {
     }
 
     const qFixed = fix(qRaw);
-    const queryWords = qFixed.split(' ').filter(w => w.length > 1); // פירוק למילים
+    // פירוק למילים והתעלמות ממילים נפוצות שלא תמיד ב-CSV
+    const ignoreWords = ["בניחוח", "של", "עם"];
+    const queryWords = qFixed.split(' ').filter(w => w.length > 1 && !ignoreWords.includes(w));
 
-    // סינון: מוצר יופיע אם לפחות אחת ממילות החיפוש מופיעה בשם שלו
     const filtered = allProducts.filter(p => {
         const pNameFixed = fix(p.name.toLowerCase().trim());
-        return queryWords.some(word => pNameFixed.includes(word));
+        // מוצא אם כל מילות החיפוש החשובות קיימות בשם
+        return queryWords.every(word => pNameFixed.includes(word));
     });
-
-    if (filtered.length === 0) {
-        status.innerText = "לא נמצאו מוצרים תואמים.";
-        container.innerHTML = "";
-        return;
-    }
 
     status.innerText = `נמצאו ${filtered.length} מוצרים:`;
 
     container.innerHTML = filtered.map(p => {
         const fullName = p.name.trim();
-        const firstWord = fullName.split(' ')[0];
         
-        // הגדרת גיבוי לתבניות אלומיניום כפי שביקשת
+        // יצירת שם "נקי" לתמונה כדי שיתאים ל-images1 (למשל הופך "BIO כביסכל 2 ליטר ספא" ל-"כביסכל בניחוח ספא")
+        let cleanForImg = fullName.replace('BIO ', '').replace(' 2 ליטר', '');
+        if (!cleanForImg.includes('בניחוח')) {
+            cleanForImg = cleanForImg.replace('כביסכל ', 'כביסכל בניחוח ');
+        }
+
         let fallback = (p.name.includes("תבנית") || p.name.includes("אלומיניום")) ? "images/bake1.jpeg" : "images/logo.jpg";
         
         return `
             <div class="product-card">
-                <img src="images1/${fullName}.jpg" 
-                     onerror="this.onerror=null; this.src='images1/${firstWord}.jpg'; this.onerror=function(){this.src='images/products/${fullName}.jpg'; this.onerror=function(){this.src='${fallback}'}};" 
+                <img src="images1/${cleanForImg}.jpg" 
+                     onerror="this.onerror=null; this.src='images/products/${fullName}.jpg'; this.onerror=function(){this.src='${fallback}'};" 
                      onclick="openImg(this.src)">
                 <h4>${p.name}</h4>
                 <div style="color:var(--primary); font-weight:bold; font-size:1.2em; margin-bottom:10px;">₪${p.price}</div>
@@ -318,6 +318,7 @@ window.onload = function() {
 </script>
 </body>
 </html>
+
 
 
 
