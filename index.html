@@ -223,7 +223,6 @@ function clearCart() {
     }
 }
 
-// פונקציית החיפוש המעודכנת בלבד:
 function filterProducts() {
     const qRaw = document.getElementById('productSearch').value.toLowerCase().trim();
     const container = document.getElementById('dynamic-products');
@@ -235,7 +234,7 @@ function filterProducts() {
         return; 
     }
 
-    // נירמול אותיות סופיות
+    // פונקציית עזר לתיקון אותיות סופיות
     function fix(s) { 
         return s.replace(/ך/g,'כ').replace(/ם/g,'מ').replace(/ן/g,'נ').replace(/ף/g,'פ').replace(/ץ/g,'צ'); 
     }
@@ -256,12 +255,15 @@ function filterProducts() {
     status.innerText = `נמצאו ${filtered.length} מוצרים:`;
 
     container.innerHTML = filtered.map(p => {
-        // גיבוי תמונה לתבניות אלומיניום
+        const cleanName = p.name.trim();
+        // הגדרת גיבוי לברירת מחדל
         let fallback = (p.name.includes("תבנית") || p.name.includes("אלומיניום")) ? "images/bake1.jpeg" : "images/logo.jpg";
         
         return `
             <div class="product-card">
-                <img src="images/products/${encodeURIComponent(p.name)}.jpg" onerror="this.src='${fallback}'" onclick="openImg(this.src)">
+                <img src="images/images1/${cleanName}.jpg" 
+                     onerror="this.onerror=null; this.src='images/products/${cleanName}.jpg'; this.onerror=function(){this.src='${fallback}'};" 
+                     onclick="openImg(this.src)">
                 <h4>${p.name}</h4>
                 <div style="color:var(--primary); font-weight:bold; font-size:1.2em; margin-bottom:10px;">₪${p.price}</div>
                 <button class="add-btn" onclick="addToCart('${p.name.replace(/'/g, "\\'")}', '${p.price}')">הוסף לסל +</button>
@@ -269,7 +271,6 @@ function filterProducts() {
         `;
     }).join('');
 }
-
 function toggleCart() {
     const m = document.getElementById('cartModal');
     m.style.display = (m.style.display === 'block') ? 'none' : 'block';
@@ -314,4 +315,5 @@ window.onload = function() {
 </script>
 </body>
 </html>
+
 
