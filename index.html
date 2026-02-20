@@ -234,7 +234,6 @@ function filterProducts() {
         return; 
     }
 
-    // פונקציית עזר לתיקון אותיות סופיות
     function fix(s) { 
         return s.replace(/ך/g,'כ').replace(/ם/g,'מ').replace(/ן/g,'נ').replace(/ף/g,'פ').replace(/ץ/g,'צ'); 
     }
@@ -255,14 +254,14 @@ function filterProducts() {
     status.innerText = `נמצאו ${filtered.length} מוצרים:`;
 
     container.innerHTML = filtered.map(p => {
-        const cleanName = p.name.trim();
-        // הגדרת גיבוי לברירת מחדל
+        const fullName = p.name.trim();
+        const brandName = fullName.split(' ')[0]; // לוקח רק את המילה הראשונה, למשל "כביסכל"
         let fallback = (p.name.includes("תבנית") || p.name.includes("אלומיניום")) ? "images/bake1.jpeg" : "images/logo.jpg";
         
         return `
             <div class="product-card">
-                <img src="images/images1/${cleanName}.jpg" 
-                     onerror="this.onerror=null; this.src='images/products/${cleanName}.jpg'; this.onerror=function(){this.src='${fallback}'};" 
+                <img src="images/images1/${fullName}.jpg" 
+                     onerror="this.onerror=null; this.src='images/images1/${brandName}.jpg'; this.onerror=function(){this.src='images/products/${fullName}.jpg'; this.onerror=function(){this.src='${fallback}'}};" 
                      onclick="openImg(this.src)">
                 <h4>${p.name}</h4>
                 <div style="color:var(--primary); font-weight:bold; font-size:1.2em; margin-bottom:10px;">₪${p.price}</div>
@@ -315,5 +314,6 @@ window.onload = function() {
 </script>
 </body>
 </html>
+
 
 
