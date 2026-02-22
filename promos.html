@@ -35,14 +35,13 @@
 
         h1 { color: var(--dark); margin-top: 30px; }
 
-        
-         .products-grid {
+ .products-grid {
     display: grid;
-    /* שינוי ל-4 עמודות שמתאימות את עצמן לרוחב המסך */
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); 
-    gap: 15px; /* צמצמתי קצת את הרווח כדי שייכנסו 4 בנחת */
+    /* הפקודה הזו מחלקת את השורה ל-4 עמודות שוות */
+    grid-template-columns: repeat(4, 1fr); 
+    gap: 15px; 
     margin-top: 30px;
-}
+} 
 
         .product-card {
             background: white; border-radius: 12px; padding: 15px;
@@ -261,6 +260,7 @@
     </script>
 </body>
 </html>
+
 
 
 
