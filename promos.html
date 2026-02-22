@@ -13,11 +13,22 @@
     }
     body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--light); margin: 0; padding: 0; text-align: center; overflow-x: hidden; }
     
+    /* שורת העגלה והחיפוש בראש הדף */
     .cart-sticky-header {
         position: sticky; top: 0; z-index: 2000;
-        background: var(--primary); color: white; padding: 12px;
+        background: var(--primary); color: white; padding: 10px 15px;
         display: flex; justify-content: center; align-items: center;
-        gap: 15px; cursor: pointer; font-weight: bold; box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        gap: 20px; font-weight: bold; box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    }
+
+    .search-box-mini { width: 160px; }
+    .search-box-mini input {
+        width: 100%;
+        padding: 5px 12px;
+        border-radius: 20px;
+        border: none;
+        outline: none;
+        font-size: 0.85em;
     }
 
     .nav-bar { 
@@ -31,11 +42,27 @@
         top: 45px; 
         z-index: 1000; 
     }
+    .nav-bar a { text-decoration: none; color: var(--dark); font-weight: 600; }
+
+    /* מסך תוצאות חיפוש צף */
+    #search-overlay {
+        display: none; 
+        position: fixed;
+        top: 95px; 
+        left: 0;
+        width: 100%;
+        height: calc(100% - 95px);
+        background: white;
+        z-index: 1500;
+        overflow-y: auto;
+        padding: 20px;
+        box-sizing: border-box;
+        text-align: right;
+    }
 
     h1 { color: var(--dark); margin-top: 30px; }
 
-    /* התיקון לגריד של 4 בשורה */
-    .products-container {
+    .products-container, .products-grid {
         display: grid !important;
         grid-template-columns: repeat(4, 1fr) !important; 
         gap: 10px;
@@ -44,7 +71,10 @@
         box-sizing: border-box;
     }
 
-    /* התיקון לכרטיס המוצר - כאן הייתה חסרה המילה .product-card */
+    @media (max-width: 600px) {
+        .products-container, .products-grid { grid-template-columns: repeat(2, 1fr) !important; }
+    }
+
     .product-card {
         background: white; 
         border-radius: 12px; 
@@ -54,12 +84,12 @@
         display: flex; 
         flex-direction: column; 
         justify-content: space-between;
-        min-width: 0; /* מונע גלילה הצידה */
+        min-width: 0;
     }
 
     .product-card img { 
         width: 100%; 
-        height: 100px; /* תמונות קטנות יותר שמתאימות ל-4 בשורה */
+        height: 100px; 
         object-fit: contain; 
         border-radius: 8px; 
         cursor: pointer; 
@@ -90,8 +120,13 @@
 </head>
 <body>
 
-    <div class="cart-sticky-header" onclick="toggleCart()">
-        🛒 מוצרים בסל: <span id="cart-count">0</span> | סה"כ: ₪<span id="cart-total-header">0.00</span>
+    <div class="cart-sticky-header">
+        <div onclick="toggleCart()" style="cursor:pointer; flex-shrink: 0;">
+            🛒 בסל: <span id="cart-count">0</span> | ₪<span id="cart-total-header">0.00</span>
+        </div>
+        <div class="search-box-mini">
+            <input type="text" id="mainSearchInput" placeholder="חיפוש מהיר..." onkeyup="syncSearch(this.value)">
+        </div>
     </div>
 
     <div class="nav-bar">
@@ -101,8 +136,16 @@
         <a href="contact.html">📞 צור קשר</a>
     </div>
 
+    <div id="search-overlay">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #eee; padding-bottom: 10px; margin-bottom: 20px;">
+            <h2 id="search-status-title" style="margin:0; font-size: 1.2em;">תוצאות חיפוש</h2>
+            <button onclick="closeSearch()" style="background:var(--primary); color:white; border:none; padding:8px 15px; border-radius:8px; cursor:pointer; font-weight:bold;">סגור X</button>
+        </div>
+        <div class="products-grid" id="search-results-container"></div>
+    </div>
+
     <h1>מבצעי החנות</h1>
-   <div id="promos-container" class="products-container"></div>
+    <div id="promos-container" class="products-container"></div>
 
     <div id="imageModal" class="modal" onclick="closeModal()">
         <img style="max-width: 90%; max-height: 85%; border-radius: 10px;" id="imgFull">
@@ -120,10 +163,8 @@
             <div class="customer-details">
                 <label>👤 שם מלא (חובה):</label>
                 <input type="text" id="cust-name" placeholder="הכנס שם מלא">
-                
                 <label>📞 טלפון (חובה):</label>
                 <input type="tel" id="cust-phone" placeholder="מספר ליצירת קשר">
-                
                 <label>📍 עיר / שכונה:</label>
                 <input type="text" id="cust-location" placeholder="לאן להגיע?">
             </div>
@@ -138,10 +179,103 @@
     </div>
 
     <script>
-        function extractPrice(priceValue) {
-            if (typeof priceValue === 'number') return priceValue;
-            let matches = String(priceValue).match(/\d+(\.\d+)?/g);
-            return matches ? parseFloat(matches[matches.length - 1]) : 0;
+        let allProducts = [];
+
+        // מחלץ מחיר למספר
+        function extractPrice(p) {
+            if (typeof p === 'number') return p;
+            let m = String(p).match(/\d+(\.\d+)?/g);
+            return m ? parseFloat(m[m.length - 1]) : 0;
+        }
+
+        // טעינת מלאי כללי לחיפוש
+        async function loadInventory() {
+            try {
+                const response = await fetch('stock.csv?t=' + Date.now());
+                const text = await response.text();
+                const rows = text.split('\n').filter(r => r.trim());
+                allProducts = [];
+                for (let i = 2; i < rows.length; i++) {
+                    let cols = rows[i].split(/[;,]/);
+                    if (cols.length > 7) {
+                        const name = cols[2]?.replace(/"/g, '').trim();
+                        const price = extractPrice(cols[6]);
+                        if (name && !isNaN(price)) allProducts.push({ name, price });
+                    }
+                }
+            } catch (e) { console.error("CSV Load Error"); }
+        }
+
+        // טעינת דף המבצעים
+        async function loadPromos() {
+            try {
+                const response = await fetch('stock_promos.csv?t=' + Date.now());
+                const data = await response.text();
+                const rows = data.split('\n').slice(1);
+                const container = document.getElementById('promos-container');
+                container.innerHTML = "";
+                
+                rows.forEach(row => {
+                    if (!row.trim()) return;
+                    const cols = row.split(',');
+                    if (cols.length >= 3) {
+                        const name = cols[0].trim();
+                        const promo = cols[1].trim();
+                        const imgSrc = cols[2].trim();
+                        container.innerHTML += `
+                            <div class="product-card">
+                                <img src="${imgSrc}" onclick="openModal('${imgSrc}')" onerror="this.src='images/placeholder.jpg'">
+                                <h4>${name}</h4>
+                                <div class="price">${promo}</div>
+                                <button class="add-btn" onclick="addToCart('${name.replace(/'/g, "\\'")}', '${promo}')">הוסף לסל +</button>
+                            </div>`;
+                    }
+                });
+            } catch (e) { console.error("Error loading Promos CSV", e); }
+        }
+
+        function syncSearch(val) {
+            const overlay = document.getElementById('search-overlay');
+            const container = document.getElementById('search-results-container');
+            const title = document.getElementById('search-status-title');
+            const qRaw = val.toLowerCase().trim();
+
+            if (!qRaw || qRaw.length < 2) { overlay.style.display = "none"; return; }
+            overlay.style.display = "block";
+
+            function fix(s) { return s.replace(/ך/g,'כ').replace(/ם/g,'מ').replace(/ן/g,'נ').replace(/ף/g,'פ').replace(/ץ/g,'צ'); }
+            const qFixed = fix(qRaw);
+            const queryWords = qFixed.split(' ').filter(w => w.length > 0);
+            
+            const filtered = allProducts.filter(p => {
+                const pNameFixed = fix(p.name.toLowerCase().trim());
+                return queryWords.some(word => pNameFixed.includes(word));
+            });
+
+            if (filtered.length === 0) {
+                title.innerText = "לא נמצאו תוצאות.";
+                container.innerHTML = "";
+                return;
+            }
+
+            title.innerText = `נמצאו ${filtered.length} תוצאות:`;
+            container.innerHTML = filtered.map(p => {
+                const cleanName = p.name.trim().replace(/\s+/g, ' ');
+                let fallback = (p.name.includes("תבנית") || p.name.includes("אלומיניום")) ? "images/bake1.jpeg" : "images/logo.jpg";
+                return `
+                    <div class="product-card">
+                        <img src="images1/${cleanName}.jpg" onerror="this.onerror=null; this.src='images/products/${cleanName}.jpg'; this.onerror=function(){this.src='${fallback}'};">
+                        <h4>${p.name}</h4>
+                        <div class="price">₪${p.price}</div>
+                        <button class="add-btn" onclick="addToCart('${p.name.replace(/'/g, "\\'")}', '${p.price}')">הוסף לסל +</button>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function closeSearch() {
+            document.getElementById('search-overlay').style.display = "none";
+            document.getElementById('mainSearchInput').value = "";
         }
 
         function updateUI() {
@@ -171,41 +305,6 @@
             document.getElementById('cart-items-list').innerHTML = itemsHtml || '<div style="text-align:center; padding:20px; color:#888;">הסל ריק</div>';
         }
 
-        // פונקציית הסרה כמו בדף הבית
-        function removeItem(idx) {
-            let cart = JSON.parse(localStorage.getItem('cart')) || [];
-            cart.splice(idx, 1);
-            localStorage.setItem('cart', JSON.stringify(cart));
-            updateUI();
-        }
-
-        async function loadPromos() {
-            try {
-                const response = await fetch('stock_promos.csv?t=' + Date.now());
-                const data = await response.text();
-                const rows = data.split('\n').slice(1);
-                const container = document.getElementById('promos-container');
-                container.innerHTML = "";
-                
-                rows.forEach(row => {
-                    if (!row.trim()) return;
-                    const cols = row.split(',');
-                    if (cols.length >= 3) {
-                        const name = cols[0].trim();
-                        const promo = cols[1].trim();
-                        const imgSrc = cols[2].trim();
-                        container.innerHTML += `
-                            <div class="product-card">
-                                <img src="${imgSrc}" onclick="openModal('${imgSrc}')" onerror="this.src='images/placeholder.jpg'">
-                                <h4>${name}</h4>
-                                <div class="price">${promo}</div>
-                                <button class="add-btn" onclick="addToCart('${name.replace(/'/g, "\\'")}', '${promo}')">הוסף לסל +</button>
-                            </div>`;
-                    }
-                });
-            } catch (e) { console.error("Error loading CSV", e); }
-        }
-
         function addToCart(name, price) {
             let cart = JSON.parse(localStorage.getItem('cart')) || [];
             const existing = cart.find(i => i.name === name);
@@ -215,9 +314,17 @@
             updateUI();
             
             const btn = event.target;
+            const oldText = btn.innerText;
             btn.innerText = "נוסף ✓";
             btn.style.background = "var(--success)";
-            setTimeout(() => { btn.innerText = "הוסף לסל +"; btn.style.background = "var(--primary)"; }, 800);
+            setTimeout(() => { btn.innerText = oldText; btn.style.background = "var(--primary)"; }, 800);
+        }
+
+        function removeItem(idx) {
+            let cart = JSON.parse(localStorage.getItem('cart')) || [];
+            cart.splice(idx, 1);
+            localStorage.setItem('cart', JSON.stringify(cart));
+            updateUI();
         }
 
         function clearCart() {
@@ -267,15 +374,11 @@
         function openModal(src) { document.getElementById('imageModal').style.display = "flex"; document.getElementById('imgFull').src = src; }
         function closeModal() { document.getElementById('imageModal').style.display = "none"; }
 
-        window.onload = function() { loadPromos(); updateUI(); };
+        window.onload = function() { 
+            loadInventory();
+            loadPromos(); 
+            updateUI(); 
+        };
     </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
