@@ -5,82 +5,88 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>מבצעים - Up סטוק</title>
     <style>
-        :root {
-            --primary: #ed1c24;
-            --dark: #333;
-            --light: #f4f4f4;
-            --success: #2ecc71;
-        }
-        body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--light); margin: 0; padding: 0; text-align: center; }
-        
-        .cart-sticky-header {
-            position: sticky; top: 0; z-index: 2000;
-            background: var(--primary); color: white; padding: 12px;
-            display: flex; justify-content: center; align-items: center;
-            gap: 15px; cursor: pointer; font-weight: bold; box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-        }
+    :root {
+        --primary: #ed1c24;
+        --dark: #333;
+        --light: #f4f4f4;
+        --success: #2ecc71;
+    }
+    body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--light); margin: 0; padding: 0; text-align: center; overflow-x: hidden; }
+    
+    .cart-sticky-header {
+        position: sticky; top: 0; z-index: 2000;
+        background: var(--primary); color: white; padding: 12px;
+        display: flex; justify-content: center; align-items: center;
+        gap: 15px; cursor: pointer; font-weight: bold; box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    }
 
-      .nav-bar { 
-    background: white; 
-    padding: 15px; 
-    display: flex; 
-    justify-content: center; 
-    gap: 30px; 
-    border-bottom: 1px solid #eee; 
-    /* הוספת הסטטיות למבצעים: */
-    position: sticky; 
-    top: 45px; 
-    z-index: 1000; 
-}
+    .nav-bar { 
+        background: white; 
+        padding: 15px; 
+        display: flex; 
+        justify-content: center; 
+        gap: 30px; 
+        border-bottom: 1px solid #eee; 
+        position: sticky; 
+        top: 45px; 
+        z-index: 1000; 
+    }
 
-        h1 { color: var(--dark); margin-top: 30px; }
+    h1 { color: var(--dark); margin-top: 30px; }
 
-.products-container {
-    display: grid !important;
-    grid-template-columns: repeat(4, 1fr) !important; /* כוח ל-4 עמודות */
-    gap: 15px;
-    padding: 20px;
-    max-width: 1200px;
-    margin: 0 auto;
-}
-            background: white; border-radius: 12px; padding: 15px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1); transition: 0.2s;
-            display: flex; flex-direction: column; justify-content: space-between;
-        }
-       .product-card img { 
-    width: 100%; 
-    height: 140px; /* זה מה שמקטין את התמונה */
-    object-fit: contain; 
-    border-radius: 8px; 
-    cursor: pointer; 
-}
-        .product-card h4 { margin: 10px 0 5px; font-size: 1.1em; color: var(--dark); height: 2.4em; overflow: hidden; }
-        .price { color: var(--primary); font-weight: bold; font-size: 1.2em; margin-bottom: 10px; }
-        
-        .add-btn {
-            background: var(--primary); color: white; border: none;
-            padding: 12px; border-radius: 8px; cursor: pointer;
-            width: 100%; font-weight: bold; transition: 0.3s;
-        }
+    /* התיקון לגריד של 4 בשורה */
+    .products-container {
+        display: grid !important;
+        grid-template-columns: repeat(4, 1fr) !important; 
+        gap: 10px;
+        padding: 10px;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
 
-        /* תיקון המודאל שיהיה זהה לדף הבית */
-        .modal { display: none; position: fixed; z-index: 5000; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); justify-content: center; align-items: center; }
-        
-        .modal-cart-content { 
-            background: white; width: 90%; max-width: 450px; border-radius: 20px; padding: 25px; 
-            text-align: right; color: #1a1a1a; 
-            max-height: 90vh; overflow-y: auto; position: relative; box-sizing: border-box; /* תיקון הגלילה */
-        }
+    /* התיקון לכרטיס המוצר - כאן הייתה חסרה המילה .product-card */
+    .product-card {
+        background: white; 
+        border-radius: 12px; 
+        padding: 10px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1); 
+        transition: 0.2s;
+        display: flex; 
+        flex-direction: column; 
+        justify-content: space-between;
+        min-width: 0; /* מונע גלילה הצידה */
+    }
 
-        .cart-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #eee; }
-        
-        /* כפתור ריקון מעוצב כמו בדף הבית */
-        .clear-cart-btn { background: none; border: 1px solid #ccc; color: #666; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+    .product-card img { 
+        width: 100%; 
+        height: 120px; /* תמונות קטנות יותר שמתאימות ל-4 בשורה */
+        object-fit: contain; 
+        border-radius: 8px; 
+        cursor: pointer; 
+    }
 
-        .customer-details { margin-top: 20px; padding: 15px; background: #f9f9f9; border-radius: 10px; border: 1px solid #eee; }
-        .customer-details label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 0.9em; }
-        .customer-details input { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
-    </style>
+    .product-card h4 { margin: 10px 0 5px; font-size: 0.9em; color: var(--dark); height: 2.4em; overflow: hidden; }
+    .price { color: var(--primary); font-weight: bold; font-size: 1.1em; margin-bottom: 10px; }
+    
+    .add-btn {
+        background: var(--primary); color: white; border: none;
+        padding: 10px; border-radius: 8px; cursor: pointer;
+        width: 100%; font-weight: bold; transition: 0.3s;
+        font-size: 0.9em;
+    }
+
+    .modal { display: none; position: fixed; z-index: 5000; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); justify-content: center; align-items: center; }
+    .modal-cart-content { 
+        background: white; width: 90%; max-width: 450px; border-radius: 20px; padding: 25px; 
+        text-align: right; color: #1a1a1a; 
+        max-height: 90vh; overflow-y: auto; position: relative; box-sizing: border-box;
+    }
+    .cart-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #eee; }
+    .clear-cart-btn { background: none; border: 1px solid #ccc; color: #666; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+    .customer-details { margin-top: 20px; padding: 15px; background: #f9f9f9; border-radius: 10px; border: 1px solid #eee; }
+    .customer-details label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 0.9em; }
+    .customer-details input { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
+</style>
 </head>
 <body>
 
@@ -265,6 +271,7 @@
     </script>
 </body>
 </html>
+
 
 
 
