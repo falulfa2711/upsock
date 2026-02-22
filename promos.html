@@ -20,8 +20,18 @@
             gap: 15px; cursor: pointer; font-weight: bold; box-shadow: 0 2px 10px rgba(0,0,0,0.2);
         }
 
-        .nav-bar { background: white; padding: 15px; display: flex; justify-content: center; gap: 30px; border-bottom: 1px solid #eee; }
-        .nav-bar a { text-decoration: none; color: var(--dark); font-weight: 600; }
+      .nav-bar { 
+    background: white; 
+    padding: 15px; 
+    display: flex; 
+    justify-content: center; 
+    gap: 30px; 
+    border-bottom: 1px solid #eee; 
+    /* הוספת הסטטיות למבצעים: */
+    position: sticky; 
+    top: 45px; 
+    z-index: 1000; 
+}
 
         h1 { color: var(--dark); margin-top: 30px; }
 
@@ -251,3 +261,4 @@
     </script>
 </body>
 </html>
+
