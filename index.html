@@ -8,6 +8,7 @@
         :root { --primary: #ed1c24; --dark: #1a1a1a; --light: #f8f9fa; --success: #2ecc71; }
         body { font-family: 'Segoe UI', Tahoma, sans-serif; margin: 0; background: var(--light); color: var(--dark); direction: rtl; }
 
+        /* סרגל עליון אדום */
         .cart-sticky-header {
             position: sticky; 
             top: 0; 
@@ -33,6 +34,7 @@
             font-size: 0.85em;
         }
 
+        /* תפריט ניווט לבן */
         .nav-bar { 
             background: white; 
             padding: 15px; 
@@ -46,30 +48,48 @@
         }
         .nav-bar a { text-decoration: none; color: var(--dark); font-weight: 600; }
 
+        /* לוגו ומכולל */
         .logo-section { padding: 30px 20px; text-align: center; background: white; }
         .logo-section img { max-width: 400px; width: 100%; border-radius: 20px; }
-
         .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
 
+        /* עיצוב כרטיסי מחלקות */
         .dept-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 20px; margin: 40px 0; }
         .dept-card { background: white; border-radius: 15px; overflow: hidden; text-decoration: none; color: inherit; transition: 0.3s; box-shadow: 0 4px 10px rgba(0,0,0,0.05); text-align: center; }
         .dept-card img { width: 100%; height: 150px; object-fit: cover; }
         .dept-card h3 { margin: 10px 0; font-size: 1.1em; }
 
-        .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; margin-top: 30px; }
+        /* מסך תוצאות החיפוש החדש */
+        #search-overlay {
+            display: none; 
+            position: fixed;
+            top: 95px; /* מתחת לניווט */
+            left: 0;
+            width: 100%;
+            height: calc(100% - 95px);
+            background: white;
+            z-index: 1500;
+            overflow-y: auto;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        /* גריד מוצרים */
+        .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; margin-top: 20px; }
         
         .product-card { 
             background: white; border-radius: 15px; padding: 15px; border: 1px solid #f0f0f0; 
             position: relative; display: flex; flex-direction: column; transition: 0.3s;
         }
-        .product-card:hover { transform: translateY(-5px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
         .product-card img { width: 100%; aspect-ratio: 1 / 1; object-fit: contain; background: #fff; border-radius: 10px; margin-bottom: 12px; }
         .product-card h4 { margin: 10px 0; min-height: 40px; }
         .add-btn { background: var(--dark); color: white; border: none; width: 100%; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: bold; }
 
+        /* גלריה */
         .shop-gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; margin: 40px 0; }
         .shop-gallery img { width: 100%; height: 200px; object-fit: cover; border-radius: 12px; cursor: pointer; }
 
+        /* מודלים ושכבות */
         #imgOverlay {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.9); z-index: 5000; justify-content: center; align-items: center; cursor: pointer;
@@ -79,10 +99,7 @@
         .modal { display: none; position: fixed; z-index: 3000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); }
         .modal-content { background: white; width: 90%; max-width: 450px; margin: 2vh auto; border-radius: 20px; padding: 25px; text-align: right; max-height: 90vh; overflow-y: auto; box-sizing: border-box; }
         .cart-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #eee; }
-        .clear-cart-btn { background: none; border: 1px solid #ccc; color: #666; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; }
-
         .customer-form { margin-top: 15px; padding: 15px; background: #f9f9f9; border-radius: 12px; }
-        .customer-form label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 0.9em; }
         .customer-form input { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; }
     </style>
 </head>
@@ -93,7 +110,7 @@
         🛒 בסל: <span id="cart-count">0</span> | ₪<span id="cart-total-header">0.00</span>
     </div>
     <div class="search-box-mini">
-        <input type="text" placeholder="חיפוש מהיר..." onkeyup="syncSearch(this.value)">
+        <input type="text" id="mainSearchInput" placeholder="חיפוש מהיר..." onkeyup="syncSearch(this.value)">
     </div>
 </div>
 
@@ -104,20 +121,25 @@
     <a href="reviews.html">⭐ חוות דעת</a>
 </div>
 
+<div id="search-overlay">
+    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #eee; padding-bottom: 10px;">
+        <h2 id="search-status-title" style="margin:0; font-size: 1.2em;">תוצאות חיפוש</h2>
+        <button onclick="closeSearch()" style="background:var(--primary); color:white; border:none; padding:8px 15px; border-radius:8px; cursor:pointer; font-weight:bold;">סגור X</button>
+    </div>
+    <div class="products-grid" id="search-results-container"></div>
+</div>
+
 <div class="logo-section">
     <img src="images/logo.jpg" alt="Up Stock Logo">
 </div>
 
-<div class="container">
+<div class="container" id="main-content">
     <div class="dept-grid">
         <a href="hadpaami.html" class="dept-card"><img src="images/hadpaami.jpg"><h3>חד פעמי</h3></a>
         <a href="baking.html" class="dept-card"><img src="images/bake1.jpeg"><h3>אפייה ומטבח</h3></a>
         <a href="cleaning.html" class="dept-card"><img src="images/clean1.jpeg"><h3>מוצרי ניקיון</h3></a>
         <a href="birthday.html" class="dept-card"><img src="images/bday1.jpeg"><h3>ימי הולדת</h3></a>
     </div>
-
-    <div id="search-status" style="text-align:center; color:#888; font-size:0.9em;"></div>
-    <div class="products-grid" id="dynamic-products"></div>
 
     <h2 style="text-align:right; border-right: 5px solid var(--primary); padding-right: 15px; margin-top: 50px;">החנות שלנו</h2>
     <div class="shop-gallery">
@@ -141,9 +163,9 @@
     <div class="modal-content">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
             <h2 style="margin:0;">הסל שלי 🛍️</h2>
-            <button class="clear-cart-btn" onclick="clearCart()">🗑️ ריקון</button>
+            <button class="clear-cart-btn" onclick="clearCart()" style="background: none; border: 1px solid #ccc; padding: 5px 10px; border-radius: 5px; cursor: pointer;">🗑️ ריקון</button>
         </div>
-        <div id="cart-items-list" style="max-height: 200px; overflow-y: auto; border-bottom: 1px solid #eee;"></div>
+        <div id="cart-items-list" style="max-height: 250px; overflow-y: auto; border-bottom: 1px solid #eee;"></div>
         <div class="customer-form">
             <label>👤 שם מלא (חובה):</label>
             <input type="text" id="cust-name-idx" placeholder="הכנס שם מלא">
@@ -172,11 +194,6 @@ function openImg(src) {
 
 function extractPrice(priceValue) {
     if (typeof priceValue === 'number') return priceValue;
-    if (priceValue.includes('ב-')) {
-        let parts = priceValue.split('ב-');
-        let extracted = parseFloat(parts[1]);
-        return isNaN(extracted) ? 0 : extracted;
-    }
     let cleaned = parseFloat(String(priceValue).replace(/[^\d.]/g, ''));
     return isNaN(cleaned) ? 0 : cleaned;
 }
@@ -211,10 +228,7 @@ function updateUI() {
                 <button onclick="removeItem(${idx})" style="background:none; border:none; color:red; cursor:pointer; font-size: 1.2em;">×</button>
                 <span style="font-weight: bold;">₪${lineTotal.toFixed(2)}</span>
             </div>
-            <div style="text-align: right;">
-                <strong>${i.name}</strong>
-                <div style="font-size: 0.8em; color: #666;">(x${qty})</div>
-            </div>
+            <div style="text-align: right;"><strong>${i.name}</strong><br><small>(x${qty})</small></div>
         </div>`;
     }).join('');
     document.getElementById('cart-count').innerText = count;
@@ -243,17 +257,20 @@ function clearCart() {
     }
 }
 
-// פונקציית החיבור החדשה שלוקחת את הערך מהסרגל למעלה
+// פונקציית החיפוש החדשה - פותחת דף חדש (שכבה)
 function syncSearch(val) {
-    const container = document.getElementById('dynamic-products');
-    const status = document.getElementById('search-status');
+    const overlay = document.getElementById('search-overlay');
+    const container = document.getElementById('search-results-container');
+    const title = document.getElementById('search-status-title');
     const qRaw = val.toLowerCase().trim();
 
     if (!qRaw || qRaw.length < 2) { 
-        container.innerHTML = ""; 
-        status.innerText = ""; 
+        overlay.style.display = "none";
         return; 
     }
+
+    // הצגת שכבת החיפוש
+    overlay.style.display = "block";
 
     function fix(s) { 
         return s.replace(/ך/g,'כ').replace(/ם/g,'מ').replace(/ן/g,'נ').replace(/ף/g,'פ').replace(/ץ/g,'צ'); 
@@ -268,12 +285,12 @@ function syncSearch(val) {
     });
 
     if (filtered.length === 0) {
-        status.innerText = "לא נמצאו מוצרים.";
+        title.innerText = "לא נמצאו תוצאות ל: " + qRaw;
         container.innerHTML = "";
         return;
     }
 
-    status.innerText = `נמצאו ${filtered.length} מוצרים:`;
+    title.innerText = `נמצאו ${filtered.length} תוצאות עבור "${qRaw}":`;
     container.innerHTML = filtered.map(p => {
         const cleanName = p.name.trim().replace(/\s+/g, ' ');
         let fallback = (p.name.includes("תבנית") || p.name.includes("אלומיניום")) ? "images/bake1.jpeg" : "images/logo.jpg";
@@ -288,6 +305,11 @@ function syncSearch(val) {
             </div>
         `;
     }).join('');
+}
+
+function closeSearch() {
+    document.getElementById('search-overlay').style.display = "none";
+    document.getElementById('mainSearchInput').value = "";
 }
 
 function toggleCart() {
