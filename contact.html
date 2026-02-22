@@ -17,9 +17,20 @@
         }
 
         /* תפריט ניווט */
-        .nav-bar { background: white; padding: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); display: flex; justify-content: center; gap: 25px; margin-bottom: 30px; }
-        .nav-bar a { text-decoration: none; color: #333; font-weight: bold; font-size: 1.1em; }
-        .nav-bar a:hover { color: var(--primary); }
+        .nav-bar { 
+    background: white; 
+    padding: 15px; 
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1); 
+    display: flex; 
+    justify-content: center; 
+    gap: 25px; 
+    margin-bottom: 30px; /* הרווח שהיה לך במקור */
+    
+    /* הוספת הסטטיות: */
+    position: sticky; 
+    top: 45px; 
+    z-index: 1000; 
+}
 
         .container { max-width: 800px; margin: 0 auto; padding: 20px; }
         .contact-card { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
@@ -131,5 +142,6 @@
 
 </body>
 </html>
+
 
 
