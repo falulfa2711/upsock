@@ -201,19 +201,21 @@ function extractPrice(priceValue) {
 
 async function loadInventory() {
     try {
-        const response = await fetch('stock.csv?t=' + Date.now());
+        const response = await fetch('stock_new.csv?t=' + Date.now());
         const text = await response.text();
         const rows = text.split('\n').filter(r => r.trim());
         allProducts = [];
-        for (let i = 2; i < rows.length; i++) {
-            let cols = rows[i].split(/[;,]/);
-            if (cols.length > 7) {
-                const name = cols[2]?.replace(/"/g, '').trim();
-                const price = parseFloat(cols[6]?.replace(/"/g, '').trim());
-                if (name && !isNaN(price)) allProducts.push({ name, price });
+        for (let i = 1; i < rows.length; i++) { // שורה 0 = כותרות
+            const cols = rows[i].split(',');
+            if (cols.length >= 3) {
+                const name  = cols[0]?.trim();
+                const image = cols[1]?.trim();
+                const price = parseFloat(cols[2]?.trim());
+                const category = cols[3]?.trim() || '';
+                if (name && !isNaN(price)) allProducts.push({ name, image, price, category });
             }
         }
-    } catch (e) { console.error("CSV Load Error"); }
+    } catch (e) { console.error("CSV Load Error", e); }
 }
 
 function updateUI() {
@@ -291,18 +293,18 @@ function syncSearch(val) {
 
     title.innerText = `נמצאו ${filtered.length} תוצאות עבור "${qRaw}":`;
     container.innerHTML = filtered.map(p => {
-        const cleanName = p.name.trim().replace(/\s+/g, ' ');
-        let fallback = (p.name.includes("תבנית") || p.name.includes("אלומיניום")) ? "images/bake1.jpeg" : "images/logo.jpg";
-        return `
+        const imgSrc = p.image ? \`images/products/\${p.image}\` : 'images/logo.jpg';
+        const fallback = 'images/logo.jpg';
+        return \`
             <div class="product-card">
-                <img src="images1/${cleanName}.jpg" 
-                     onerror="this.onerror=null; this.src='images/products/${cleanName}.jpg'; this.onerror=function(){this.src='${fallback}'};" 
+                <img src="\${imgSrc}" 
+                     onerror="this.src='\${fallback}'" 
                      onclick="openImg(this.src)">
-                <h4>${p.name}</h4>
-                <div style="color:var(--primary); font-weight:bold; font-size:1.2em; margin-bottom:10px;">₪${p.price}</div>
-                <button class="add-btn" onclick="addToCart('${p.name.replace(/'/g, "\\'")}', '${p.price}')">הוסף לסל +</button>
+                <h4>\${p.name}</h4>
+                <div style="color:var(--primary); font-weight:bold; font-size:1.2em; margin-bottom:10px;">₪\${p.price}</div>
+                <button class="add-btn" onclick="addToCart('\${p.name.replace(/'/g, "\\'")}', '\${p.price}')">הוסף לסל +</button>
             </div>
-        `;
+        \`;
     }).join('');
 }
 
