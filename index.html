@@ -63,7 +63,7 @@
         #search-overlay {
             display: none; 
             position: fixed;
-            top: 95px; /* מתחת לניווט */
+            top: 95px;
             left: 0;
             width: 100%;
             height: calc(100% - 95px);
@@ -117,6 +117,7 @@
 <div class="nav-bar">
     <a href="index.html">🏠 בית</a>
     <a href="promos.html" style="color: #ed1c24; font-weight: 800;">🔥 מבצעים</a>
+    <a href="about.html">ℹ️ אודות</a>
     <a href="contact.html">📞 צור קשר</a>
     <a href="reviews.html">⭐ חוות דעת</a>
 </div>
@@ -257,7 +258,6 @@ function clearCart() {
     }
 }
 
-// פונקציית החיפוש החדשה - פותחת דף חדש (שכבה)
 function syncSearch(val) {
     const overlay = document.getElementById('search-overlay');
     const container = document.getElementById('search-results-container');
@@ -269,7 +269,6 @@ function syncSearch(val) {
         return; 
     }
 
-    // הצגת שכבת החיפוש
     overlay.style.display = "block";
 
     function fix(s) { 
