@@ -143,25 +143,11 @@
         <div class="payment-section">
             <div class="payment-title">💳 או שלם עכשיו:</div>
 
-            <!-- PayBox -->
-            <!-- כשיהיה לך חשבון PayBox, החלף YOUR_PAYBOX_NUMBER במספר הטלפון של העסק ב-PayBox -->
-            <button class="pay-btn pay-btn-paybox" onclick="payWithPayBox()">
-                💜 תשלום עם PayBox
-            </button>
-
             <!-- Bit -->
-            <!-- כשיהיה לך Bit עסקי, החלף YOUR_BIT_NUMBER במספר הטלפון שלך ב-Bit -->
             <button class="pay-btn pay-btn-bit" onclick="payWithBit()">
                 🔵 תשלום עם Bit
             </button>
-
-            <!-- אשראי דרך PayBox -->
-            <!-- PayBox מאפשר גם תשלום אשראי — אותו מספר כמו PayBox -->
-            <button class="pay-btn pay-btn-credit" onclick="payWithCredit()">
-                💳 תשלום באשראי
-            </button>
-
-            <div class="payment-note">⚠️ התשלום בהמתנה להפעלת חשבון — כרגע ישלח לוואטסאפ</div>
+            <!-- PayBox + אשראי יופעלו כאן כשיהיה חשבון -->
         </div>
 
         <button onclick="toggleCart()" style="width:100%; background:none; border:none; color:#999; cursor:pointer; margin-top:10px;">סגור</button>
@@ -176,7 +162,7 @@ let cart = [];
 // ⚙️  הגדרות תשלום — עדכן כאן כשיהיו לך חשבונות
 // ===================================================
 const PAYBOX_NUMBER = 'YOUR_PAYBOX_NUMBER'; // מספר הטלפון ב-PayBox עסקי  (למשל: '0549397753')
-const BIT_NUMBER    = 'YOUR_BIT_NUMBER';    // מספר הטלפון ב-Bit עסקי     (למשל: '0549397753')
+const BIT_NUMBER    = '0543191550';         // מספר הטלפון ב-Bit עסקי
 // ===================================================
 
 function openImg(src) {
