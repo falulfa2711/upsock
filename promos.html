@@ -43,15 +43,19 @@
                     if (!row.trim()) return;
                     const cols = row.split(',');
                     if (cols.length >= 3) {
-                        const name   = cols[0].trim();
-                        const promo  = cols[1].trim();
-                        const imgSrc = cols[2].trim();
+                        const name      = cols[0].trim();
+                        const promo     = cols[1].trim();
+                        const imgSrc    = cols[2].trim();
+                        const units     = cols[3] ? parseInt(cols[3].trim()) : 1;
+                        const safeName  = name.replace(/'/g, "\\'");
+                        const safePromo = promo.replace(/'/g, "\\'");
                         container.innerHTML +=
                             '<div class="product-card">' +
                             '<img src="' + imgSrc + '" onclick="openModal(\'' + imgSrc + '\')" onerror="this.src=\'images/logo.jpg\'">' +
                             '<h4>' + name + '</h4>' +
                             '<div class="price">' + promo + '</div>' +
-                            '<button class="add-btn" onclick="addToCart(\'' + name.replace(/'/g, "\\'") + '\', \'' + promo + '\')">הוסף לסל +</button>' +
+                            '<div style="font-size:0.82em;color:#888;margin-bottom:8px;">מארז של ' + units + ' יחידות</div>' +
+                            '<button class="add-btn" onclick="addToCart(\'' + safeName + '\', \'' + safePromo + '\', ' + units + ')">הוסף לסל +</button>' +
                             '</div>';
                     }
                 });
