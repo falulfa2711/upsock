@@ -196,9 +196,12 @@
         if (!qRaw || qRaw.length < 2) { overlay.style.display = "none"; return; }
         overlay.style.display = "block";
         function fix(s) { return s.replace(/ך/g,'כ').replace(/ם/g,'מ').replace(/ן/g,'נ').replace(/ף/g,'פ').replace(/ץ/g,'צ'); }
+        function removePunct(s) { return s.replace(/['\-\.,"]/g, ''); }
+        function normSmichut(s) { return s.replace(/ת(\s|$)/g, 'א$1').replace(/ת$/g, 'א'); }
         const qFixed     = fix(qRaw);
         const queryWords = qFixed.split(' ').filter(w => w.length > 0);
-        const filtered   = allProducts.filter(p => queryWords.some(word => fix(p.name.toLowerCase()).includes(word)));
+        const queryStems = queryWords.map(w => { const n = removePunct(normSmichut(w)); return n.length > 3 ? n.substring(0, 3) : n; });
+        const filtered   = allProducts.filter(p => { const pFixed = removePunct(normSmichut(fix(p.name.toLowerCase()))); return queryStems.every(stem => pFixed.includes(stem)); });
         if (filtered.length === 0) { title.innerText = "לא נמצאו תוצאות."; container.innerHTML = ""; return; }
         title.innerText = 'נמצאו ' + filtered.length + ' תוצאות עבור "' + qRaw + '":';
         container.innerHTML = filtered.map(p => {
