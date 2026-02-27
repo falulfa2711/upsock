@@ -43,23 +43,40 @@
                     if (!row.trim()) return;
                     const cols = row.split(',');
                     if (cols.length >= 3) {
-                        const name      = cols[0].trim();
-                        const promo     = cols[1].trim();
-                        const imgSrc    = cols[2].trim();
-                        const units     = cols[3] ? parseInt(cols[3].trim()) : 1;
-                        const safeName  = name.replace(/'/g, "\\'");
-                        const safePromo = promo.replace(/'/g, "\\'");
+                        const name       = cols[0].trim();
+                        const promo      = cols[1].trim();
+                        const imgSrc     = cols[2].trim();
+                        const units      = cols[3] ? parseInt(cols[3].trim()) : 1;
+                        const unitPrice  = cols[4] && cols[4].trim() !== '' ? parseFloat(cols[4].trim()) : null;
+                        const promoNums  = promo.match(/\d+/g) || [];
+                        const promoPrice = promoNums.length >= 2 ? parseFloat(promoNums[promoNums.length - 1]) : null;
+                        const safeName   = name.replace(/'/g, "\\'");
+                        const unitLabel  = unitPrice ? '<div style="font-size:0.8em;color:#aaa;margin-bottom:2px;">מחיר יחידה: ₪' + unitPrice + '</div>' : '';
                         container.innerHTML +=
                             '<div class="product-card">' +
                             '<img src="' + imgSrc + '" onclick="openModal(\'' + imgSrc + '\')" onerror="this.src=\'images/logo.jpg\'">' +
                             '<h4>' + name + '</h4>' +
                             '<div class="price">' + promo + '</div>' +
-                            '<div style="font-size:0.82em;color:#888;margin-bottom:8px;">מארז של ' + units + ' יחידות</div>' +
-                            '<button class="add-btn" onclick="addToCart(\'' + safeName + '\', \'' + safePromo + '\', ' + units + ')">הוסף לסל +</button>' +
+                            unitLabel +
+                            '<div style="font-size:0.82em;color:#888;margin-bottom:8px;">מארז: ' + units + ' יחידות</div>' +
+                            '<button class="add-btn" onclick="addPromoToCart(\'' + safeName + '\', ' + (unitPrice !== null ? unitPrice : 'null') + ', ' + (promoPrice !== null ? promoPrice : 'null') + ', ' + units + ')">הוסף לסל +</button>' +
                             '</div>';
                     }
                 });
             } catch (e) { console.error("Error loading Promos CSV", e); }
+        }
+
+        function addPromoToCart(name, unitPrice, promoPrice, units) {
+            let cart = JSON.parse(localStorage.getItem('cart')) || [];
+            const existing = cart.find(i => i.name === name);
+            if (existing) {
+                existing.qty++;
+            } else {
+                cart.push({ name, unitPrice, promoPrice, units, qty: 1, isPromo: true });
+            }
+            localStorage.setItem('cart', JSON.stringify(cart));
+            if (typeof updateUI === 'function') updateUI();
+            if (typeof showToast === 'function') showToast('✅ ' + name.substring(0, 20) + ' נוסף לסל!');
         }
 
         function openModal(src) { document.getElementById('imageModal').style.display = "flex"; document.getElementById('imgFull').src = src; }
