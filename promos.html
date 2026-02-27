@@ -13,6 +13,8 @@
     .search-box-mini input { width: 100%; padding: 8px 16px; border-radius: 20px; border: none; outline: none; font-size: 1em; font-family: 'Segoe UI', Tahoma, sans-serif; }
     .nav-bar { background: white; padding: 15px; display: flex; justify-content: center; gap: 30px; border-bottom: 1px solid #eee; position: sticky; top: 45px; z-index: 1000; }
     .nav-bar a { text-decoration: none; color: var(--dark); font-weight: 600; }
+    /* תג אזל המלאי */
+    .out-of-stock-badge { background: #ed1c24; color: white; font-size: 0.8em; font-weight: bold; padding: 4px 10px; border-radius: 20px; display: inline-block; margin-bottom: 8px; }
     #search-overlay { display: none; position: fixed; top: 95px; left: 0; width: 100%; height: calc(100% - 95px); background: white; z-index: 1500; overflow-y: auto; padding: 20px; box-sizing: border-box; text-align: right; }
     h1 { color: var(--dark); margin-top: 30px; }
     .products-container, .products-grid { display: grid !important; grid-template-columns: repeat(4, 1fr) !important; gap: 10px; padding: 10px; max-width: 100%; box-sizing: border-box; }
@@ -124,7 +126,8 @@
                     const image    = cols[1]?.trim();
                     const price    = parseFloat(cols[2]?.trim());
                     const category = cols[3]?.trim() || '';
-                    if (name && !isNaN(price)) allProducts.push({ name, image, price, category });
+                    const stock    = cols[4]?.trim() !== '0'; // false = אזל
+                    if (name && !isNaN(price)) allProducts.push({ name, image, price, category, stock });
                 }
             }
         } catch (e) { console.error("CSV Load Error", e); }
@@ -174,11 +177,15 @@
             const imgJpg   = baseName ? 'images/products/' + baseName + '.jpg'  : 'images/logo.jpg';
             const imgJpeg  = baseName ? 'images/products/' + baseName + '.jpeg' : 'images/logo.jpg';
             const safeName = p.name.replace(/'/g, "\\'");
+            const outOfStock = !p.stock;
             return '<div class="product-card">' +
                 '<img src="' + imgJpg + '" onerror="this.onerror=null;this.src=\'' + imgJpeg + '\';this.onerror=function(){this.src=\'images/logo.jpg\'}" onclick="openModal(this.src)">' +
+                (outOfStock ? '<div class="out-of-stock-badge">❌ אזל המלאי</div>' : '') +
                 '<h4>' + p.name + '</h4>' +
                 '<div class="price">₪' + p.price + '</div>' +
-                '<button class="add-btn" onclick="addToCart(\'' + safeName + '\',\'' + p.price + '\')">הוסף לסל +</button>' +
+                (outOfStock
+                    ? '<button class="add-btn" disabled style="background:#ccc;cursor:not-allowed;">אזל המלאי</button>'
+                    : '<button class="add-btn" onclick="addToCart(\'' + safeName + '\',\'' + p.price + '\')">הוסף לסל +</button>') +
                 '</div>';
         }).join('');
     }
