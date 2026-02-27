@@ -29,7 +29,6 @@
         .add-btn { background: var(--dark); color: white; border: none; width: 100%; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: background 0.2s; }
         .add-btn:active { background: #444; }
         .add-btn:disabled { background: #ccc; cursor: not-allowed; }
-        /* תג אזל המלאי */
         .out-of-stock-badge { background: #ed1c24; color: white; font-size: 0.8em; font-weight: bold; padding: 4px 10px; border-radius: 20px; display: inline-block; margin-bottom: 8px; }
         .shop-gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; margin: 40px 0; }
         .shop-gallery img { width: 100%; height: 200px; object-fit: cover; border-radius: 12px; cursor: pointer; }
@@ -44,6 +43,16 @@
         .whatsapp-float:hover { transform: scale(1.05); }
         #cart-toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(20px); background: #1a1a1a; color: white; padding: 12px 24px; border-radius: 25px; font-size: 1em; font-weight: bold; z-index: 6000; opacity: 0; transition: opacity 0.3s, transform 0.3s; pointer-events: none; white-space: nowrap; }
         #cart-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+        /* ===== כפתורי תשלום ===== */
+        .payment-section { margin-top: 15px; border-top: 1px solid #eee; padding-top: 15px; }
+        .payment-title { font-size: 0.9em; color: #666; margin-bottom: 10px; text-align: center; }
+        .pay-btn { width: 100%; padding: 14px; border: none; border-radius: 10px; font-size: 1.1em; font-weight: bold; cursor: pointer; margin-bottom: 8px; display: flex; align-items: center; justify-content: center; gap: 8px; transition: opacity 0.2s; }
+        .pay-btn:hover { opacity: 0.9; }
+        .pay-btn-paybox { background: #6c3ce0; color: white; }
+        .pay-btn-bit    { background: #0070f3; color: white; }
+        .pay-btn-credit { background: #ff6b00; color: white; }
+        .payment-note { font-size: 0.75em; color: #aaa; text-align: center; margin-top: 5px; }
     </style>
 </head>
 <body>
@@ -124,7 +133,37 @@
         <div style="display:flex; justify-content:space-between; font-size:1.4em; font-weight:bold; margin-top:15px;">
             <span>סה"כ:</span><span>₪<span id="cart-total-modal">0.00</span></span>
         </div>
-        <button onclick="sendToWhatsApp()" style="background:#25d366; color:white; border:none; width:100%; padding:15px; border-radius:10px; font-size:1.2em; font-weight:bold; cursor:pointer; margin-top:15px;">שלח הזמנה בוואטסאפ</button>
+
+        <!-- ===== כפתור וואטסאפ מקורי ===== -->
+        <button onclick="sendToWhatsApp()" style="background:#25d366; color:white; border:none; width:100%; padding:15px; border-radius:10px; font-size:1.2em; font-weight:bold; cursor:pointer; margin-top:15px;">
+            💬 שלח הזמנה בוואטסאפ
+        </button>
+
+        <!-- ===== תשתית תשלום ===== -->
+        <div class="payment-section">
+            <div class="payment-title">💳 או שלם עכשיו:</div>
+
+            <!-- PayBox -->
+            <!-- כשיהיה לך חשבון PayBox, החלף YOUR_PAYBOX_NUMBER במספר הטלפון של העסק ב-PayBox -->
+            <button class="pay-btn pay-btn-paybox" onclick="payWithPayBox()">
+                💜 תשלום עם PayBox
+            </button>
+
+            <!-- Bit -->
+            <!-- כשיהיה לך Bit עסקי, החלף YOUR_BIT_NUMBER במספר הטלפון שלך ב-Bit -->
+            <button class="pay-btn pay-btn-bit" onclick="payWithBit()">
+                🔵 תשלום עם Bit
+            </button>
+
+            <!-- אשראי דרך PayBox -->
+            <!-- PayBox מאפשר גם תשלום אשראי — אותו מספר כמו PayBox -->
+            <button class="pay-btn pay-btn-credit" onclick="payWithCredit()">
+                💳 תשלום באשראי
+            </button>
+
+            <div class="payment-note">⚠️ התשלום בהמתנה להפעלת חשבון — כרגע ישלח לוואטסאפ</div>
+        </div>
+
         <button onclick="toggleCart()" style="width:100%; background:none; border:none; color:#999; cursor:pointer; margin-top:10px;">סגור</button>
     </div>
 </div>
@@ -132,6 +171,13 @@
 <script>
 let allProducts = [];
 let cart = [];
+
+// ===================================================
+// ⚙️  הגדרות תשלום — עדכן כאן כשיהיו לך חשבונות
+// ===================================================
+const PAYBOX_NUMBER = 'YOUR_PAYBOX_NUMBER'; // מספר הטלפון ב-PayBox עסקי  (למשל: '0549397753')
+const BIT_NUMBER    = 'YOUR_BIT_NUMBER';    // מספר הטלפון ב-Bit עסקי     (למשל: '0549397753')
+// ===================================================
 
 function openImg(src) {
     document.getElementById('viewImg').src = src;
@@ -157,12 +203,112 @@ async function loadInventory() {
                 const image    = cols[1]?.trim();
                 const price    = parseFloat(cols[2]?.trim());
                 const category = cols[3]?.trim() || '';
-                const stock    = cols[4]?.trim() !== '0'; // false = אזל
+                const stock    = cols[4]?.trim() !== '0';
                 if (name && !isNaN(price)) allProducts.push({ name, image, price, category, stock });
             }
         }
     } catch (e) { console.error("CSV Load Error", e); }
 }
+
+function getOrderDetails() {
+    const currentCart = JSON.parse(localStorage.getItem('cart')) || [];
+    const name     = document.getElementById('cust-name-idx').value.trim();
+    const phone    = document.getElementById('cust-phone-idx').value.trim();
+    const location = document.getElementById('cust-loc-idx').value.trim();
+    let total = 0;
+    currentCart.forEach(i => { total += extractPrice(i.price) * (i.qty || 1); });
+    return { currentCart, name, phone, location, total };
+}
+
+function validateOrder() {
+    const { currentCart, name, phone } = getOrderDetails();
+    if (currentCart.length === 0) { alert("הסל ריק"); return false; }
+    if (!name || !phone) { alert("בבקשה מלא שם ומספר טלפון"); return false; }
+    return true;
+}
+
+function buildWhatsAppMsg() {
+    const { currentCart, name, phone, location, total } = getOrderDetails();
+    let msg = "*הזמנה חדשה מאתר Up סטוק*\n--------------------------\n";
+    msg += '👤 *שם:* ' + name + '\n📞 *טלפון:* ' + phone + '\n';
+    if (location) msg += '📍 *מיקום:* ' + location + '\n';
+    msg += "--------------------------\n";
+    currentCart.forEach(i => {
+        const p = extractPrice(i.price), q = i.qty || 1;
+        msg += '• ' + i.name + '\n  כמות: ' + q + ' | סה"כ: ₪' + (p * q).toFixed(2) + '\n';
+    });
+    msg += '--------------------------\n💰 *סה"כ לתשלום: ₪' + total.toFixed(2) + '*';
+    return msg;
+}
+
+// ===== פונקציות תשלום =====
+
+function payWithPayBox() {
+    if (!validateOrder()) return;
+    const { total, name } = getOrderDetails();
+
+    if (PAYBOX_NUMBER === 'YOUR_PAYBOX_NUMBER') {
+        // חשבון עדיין לא הוגדר — שולח לוואטסאפ
+        alert('חשבון PayBox עדיין לא הוגדר.\nמעביר להזמנה בוואטסאפ...');
+        sendToWhatsApp();
+        return;
+    }
+
+    // קישור PayBox — פותח את דף התשלום של PayBox עם הסכום
+    const note = encodeURIComponent('הזמנה מ-Up סטוק - ' + name);
+    const url  = 'https://payboxapp.page.link/?link=https://paybox.me/' + PAYBOX_NUMBER + '?amount=' + total.toFixed(2) + '%26description=' + note;
+    window.open(url, '_blank');
+
+    // שולח גם הודעת וואטסאפ עם פרטי ההזמנה
+    setTimeout(() => {
+        const msg = buildWhatsAppMsg() + '\n💜 *תשלום נשלח דרך PayBox*';
+        window.location.href = "https://wa.me/972549397753?text=" + encodeURIComponent(msg);
+    }, 1500);
+}
+
+function payWithBit() {
+    if (!validateOrder()) return;
+    const { total, name } = getOrderDetails();
+
+    if (BIT_NUMBER === 'YOUR_BIT_NUMBER') {
+        alert('חשבון Bit עדיין לא הוגדר.\nמעביר להזמנה בוואטסאפ...');
+        sendToWhatsApp();
+        return;
+    }
+
+    // קישור Bit
+    const note = encodeURIComponent('הזמנה מ-Up סטוק - ' + name);
+    const url  = 'https://bit.ly/pay/' + BIT_NUMBER + '?amount=' + total.toFixed(2) + '&note=' + note;
+    window.open(url, '_blank');
+
+    setTimeout(() => {
+        const msg = buildWhatsAppMsg() + '\n🔵 *תשלום נשלח דרך Bit*';
+        window.location.href = "https://wa.me/972549397753?text=" + encodeURIComponent(msg);
+    }, 1500);
+}
+
+function payWithCredit() {
+    if (!validateOrder()) return;
+    const { total, name } = getOrderDetails();
+
+    if (PAYBOX_NUMBER === 'YOUR_PAYBOX_NUMBER') {
+        alert('חשבון PayBox עדיין לא הוגדר (נדרש לתשלום אשראי).\nמעביר להזמנה בוואטסאפ...');
+        sendToWhatsApp();
+        return;
+    }
+
+    // PayBox תומך גם בתשלום אשראי דרך אותו קישור
+    const note = encodeURIComponent('הזמנה מ-Up סטוק - ' + name);
+    const url  = 'https://payboxapp.page.link/?link=https://paybox.me/' + PAYBOX_NUMBER + '?amount=' + total.toFixed(2) + '%26description=' + note + '%26paymentMethod=creditCard';
+    window.open(url, '_blank');
+
+    setTimeout(() => {
+        const msg = buildWhatsAppMsg() + '\n💳 *תשלום נשלח דרך אשראי (PayBox)*';
+        window.location.href = "https://wa.me/972549397753?text=" + encodeURIComponent(msg);
+    }, 1500);
+}
+
+// ===== פונקציות סל =====
 
 function updateUI() {
     cart = JSON.parse(localStorage.getItem('cart')) || [];
@@ -217,43 +363,27 @@ function syncSearch(val) {
     const container = document.getElementById('search-results-container');
     const title     = document.getElementById('search-status-title');
     const qRaw      = val.toLowerCase().trim();
-
     if (!qRaw || qRaw.length < 2) { overlay.style.display = "none"; return; }
     overlay.style.display = "block";
-
     function fix(s) { return s.replace(/ך/g,'כ').replace(/ם/g,'מ').replace(/ן/g,'נ').replace(/ף/g,'פ').replace(/ץ/g,'צ'); }
     const qFixed     = fix(qRaw);
     const queryWords = qFixed.split(' ').filter(w => w.length > 0);
-
-    const filtered = allProducts.filter(p => {
-        const pNameFixed = fix(p.name.toLowerCase().trim());
-        return queryWords.some(word => pNameFixed.includes(word));
-    });
-
-    if (filtered.length === 0) {
-        title.innerText = "לא נמצאו תוצאות ל: " + qRaw;
-        container.innerHTML = "";
-        return;
-    }
-
+    const filtered   = allProducts.filter(p => queryWords.some(word => fix(p.name.toLowerCase()).includes(word)));
+    if (filtered.length === 0) { title.innerText = "לא נמצאו תוצאות ל: " + qRaw; container.innerHTML = ""; return; }
     title.innerText = 'נמצאו ' + filtered.length + ' תוצאות עבור "' + qRaw + '":';
-
     container.innerHTML = filtered.map(p => {
-        const baseName = p.image ? p.image.replace(/\.(jpg|jpeg)$/i, '') : '';
-        const imgJpg   = baseName ? 'images/products/' + baseName + '.jpg'  : 'images/logo.jpg';
-        const imgJpeg  = baseName ? 'images/products/' + baseName + '.jpeg' : 'images/logo.jpg';
-        const safeName = p.name.replace(/'/g, "\\'");
+        const baseName   = p.image ? p.image.replace(/\.(jpg|jpeg)$/i, '') : '';
+        const imgJpg     = baseName ? 'images/products/' + baseName + '.jpg'  : 'images/logo.jpg';
+        const imgJpeg    = baseName ? 'images/products/' + baseName + '.jpeg' : 'images/logo.jpg';
+        const safeName   = p.name.replace(/'/g, "\\'");
         const outOfStock = !p.stock;
-
         return '<div class="product-card" style="' + (outOfStock ? 'opacity:0.7;' : '') + '">' +
             '<img src="' + imgJpg + '" onerror="this.onerror=null;this.src=\'' + imgJpeg + '\';this.onerror=function(){this.src=\'images/logo.jpg\'}" onclick="openImg(this.src)">' +
             '<h4>' + p.name + '</h4>' +
             (outOfStock ? '<div class="out-of-stock-badge">❌ אזל המלאי</div>' : '') +
             '<div style="color:var(--primary);font-weight:bold;font-size:1.2em;margin-bottom:10px;">₪' + p.price + '</div>' +
             '<button class="add-btn" ' + (outOfStock ? 'disabled' : 'onclick="addToCart(\'' + safeName + '\',\'' + p.price + '\')"') + '>' +
-            (outOfStock ? 'אזל המלאי' : 'הוסף לסל +') +
-            '</button>' +
-            '</div>';
+            (outOfStock ? 'אזל המלאי' : 'הוסף לסל +') + '</button></div>';
     }).join('');
 }
 
@@ -269,23 +399,8 @@ function toggleCart() {
 }
 
 function sendToWhatsApp() {
-    const currentCart = JSON.parse(localStorage.getItem('cart')) || [];
-    const name     = document.getElementById('cust-name-idx').value.trim();
-    const phone    = document.getElementById('cust-phone-idx').value.trim();
-    const location = document.getElementById('cust-loc-idx').value.trim();
-    if (currentCart.length === 0) return alert("הסל ריק");
-    if (!name || !phone) return alert("בבקשה מלא שם ומספר טלפון ליצירת קשר");
-    let msg = "*הזמנה חדשה מאתר Up סטוק*\n--------------------------\n";
-    msg += '👤 *שם:* ' + name + '\n📞 *טלפון:* ' + phone + '\n';
-    if (location) msg += '📍 *מיקום:* ' + location + '\n';
-    msg += "--------------------------\n";
-    let totalOrder = 0;
-    currentCart.forEach(i => {
-        let p = extractPrice(i.price), q = i.qty || 1, sub = p * q;
-        totalOrder += sub;
-        msg += '• ' + i.name + '\n  כמות: ' + q + ' | סה"כ: ₪' + sub.toFixed(2) + '\n';
-    });
-    msg += "--------------------------\n💰 *סה\"כ לתשלום: ₪" + totalOrder.toFixed(2) + '*';
+    if (!validateOrder()) return;
+    const msg = buildWhatsAppMsg();
     window.location.href = "https://wa.me/972549397753?text=" + encodeURIComponent(msg);
 }
 
