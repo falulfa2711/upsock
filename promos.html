@@ -31,6 +31,12 @@
     .customer-details { margin-top: 20px; padding: 15px; background: #f9f9f9; border-radius: 10px; border: 1px solid #eee; }
     .customer-details label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 0.9em; }
     .customer-details input { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
+    /* כפתור תשלום */
+    .payment-section { margin-top: 15px; border-top: 1px solid #eee; padding-top: 15px; }
+    .payment-title { font-size: 0.9em; color: #666; margin-bottom: 10px; text-align: center; }
+    .pay-btn { width: 100%; padding: 14px; border: none; border-radius: 10px; font-size: 1.1em; font-weight: bold; cursor: pointer; margin-bottom: 8px; display: flex; align-items: center; justify-content: center; gap: 8px; transition: opacity 0.2s; }
+    .pay-btn:hover { opacity: 0.9; }
+    .pay-btn-bit { background: #0070f3; color: white; }
     .whatsapp-float { position: fixed; bottom: 25px; left: 25px; background: #25d366; color: white; border-radius: 50px; padding: 14px 20px; font-size: 1em; font-weight: bold; text-decoration: none; box-shadow: 0 4px 15px rgba(37,211,102,0.5); z-index: 4000; display: flex; align-items: center; gap: 8px; transition: transform 0.2s; }
     .whatsapp-float:hover { transform: scale(1.05); }
     #cart-toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(20px); background: #1a1a1a; color: white; padding: 12px 24px; border-radius: 25px; font-size: 1em; font-weight: bold; z-index: 6000; opacity: 0; transition: opacity 0.3s, transform 0.3s; pointer-events: none; white-space: nowrap; }
@@ -89,7 +95,13 @@
         <div style="display:flex;justify-content:space-between;font-size:1.5em;font-weight:bold;margin-top:15px;padding-top:10px;">
             <span>סה"כ:</span><span>₪<span id="cart-total-modal">0.00</span></span>
         </div>
-        <button onclick="sendToWhatsApp()" style="background:#25d366;color:white;border:none;width:100%;padding:15px;border-radius:10px;font-size:1.2em;font-weight:bold;cursor:pointer;margin-top:15px;">שלח הזמנה בוואטסאפ</button>
+        <button onclick="sendToWhatsApp()" style="background:#25d366;color:white;border:none;width:100%;padding:15px;border-radius:10px;font-size:1.2em;font-weight:bold;cursor:pointer;margin-top:15px;">💬 שלח הזמנה בוואטסאפ</button>
+
+        <div class="payment-section">
+            <div class="payment-title">💳 או שלם עכשיו:</div>
+            <button class="pay-btn pay-btn-bit" onclick="payWithBit()">🔵 תשלום עם Bit</button>
+        </div>
+
         <button onclick="toggleCart()" style="width:100%;background:none;border:none;color:#999;cursor:pointer;margin-top:10px;">סגור</button>
     </div>
 </div>
@@ -99,6 +111,22 @@
 
 <script>
     let allProducts = [];
+
+    const BIT_NUMBER = '0543191550';
+
+    function payWithBit() {
+        const currentCart = JSON.parse(localStorage.getItem('cart')) || [];
+        const name  = document.getElementById('cust-name').value.trim();
+        const phone = document.getElementById('cust-phone').value.trim();
+        if (currentCart.length === 0) return alert("הסל ריק");
+        if (!name || !phone) return alert("חובה למלא שם ומספר טלפון");
+        let total = 0;
+        currentCart.forEach(i => { total += extractPrice(i.price) * (i.qty || 1); });
+        const note = encodeURIComponent('הזמנה מ-Up סטוק - ' + name);
+        const url  = 'https://bit.ly/pay/' + BIT_NUMBER + '?amount=' + total.toFixed(2) + '&note=' + note;
+        window.open(url, '_blank');
+        setTimeout(() => sendToWhatsApp(), 1500);
+    }
 
     function showToast(msg) {
         const toast = document.getElementById('cart-toast');
