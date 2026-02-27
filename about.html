@@ -207,7 +207,7 @@
         function fix(s) { return s.replace(/ך/g,'כ').replace(/ם/g,'מ').replace(/ן/g,'נ').replace(/ף/g,'פ').replace(/ץ/g,'צ'); }
         const qFixed     = fix(qRaw);
         const queryWords = qFixed.split(' ').filter(w => w.length > 0);
-        const filtered   = allProducts.filter(p => queryWords.some(word => fix(p.name.toLowerCase()).includes(word)));
+        const filtered   = allProducts.filter(p => queryWords.every(word => fix(p.name.toLowerCase()).includes(word)));
         if (filtered.length === 0) { title.innerText = "לא נמצאו תוצאות."; container.innerHTML = ""; return; }
         title.innerText = 'נמצאו ' + filtered.length + ' תוצאות עבור "' + qRaw + '":';
         container.innerHTML = filtered.map(p => {
