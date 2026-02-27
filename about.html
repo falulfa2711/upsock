@@ -206,10 +206,18 @@
         overlay.style.display = "block";
         function fix(s) { return s.replace(/ך/g,'כ').replace(/ם/g,'מ').replace(/ן/g,'נ').replace(/ף/g,'פ').replace(/ץ/g,'צ'); }
         const qFixed     = fix(qRaw);
+        // הסרת סימני פיסוק (גרש, מקף, נקודה וכו')
+        function removePunct(s) { return s.replace(/['\-\.,"]/g, ''); }
+        function normSmichut(s) {
+            return s.replace(/ת(\s|$)/g, 'א$1').replace(/ת$/g, 'א');
+        }
         const queryWords = qFixed.split(' ').filter(w => w.length > 0);
-        const queryStems = queryWords.map(w => w.length > 3 ? w.substring(0, 3) : w);
+        const queryStems = queryWords.map(w => {
+            const norm = removePunct(normSmichut(w));
+            return norm.length > 3 ? norm.substring(0, 3) : norm;
+        });
         const filtered   = allProducts.filter(p => {
-            const pFixed = fix(p.name.toLowerCase());
+            const pFixed = removePunct(normSmichut(fix(p.name.toLowerCase())));
             return queryStems.every(stem => pFixed.includes(stem));
         });
         if (filtered.length === 0) { title.innerText = "לא נמצאו תוצאות."; container.innerHTML = ""; return; }
