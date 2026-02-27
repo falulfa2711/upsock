@@ -13,11 +13,13 @@
         .search-box-mini input { width: 100%; padding: 8px 16px; border-radius: 20px; border: none; outline: none; font-size: 1em; font-family: 'Segoe UI', Tahoma, sans-serif; }
         .nav-bar { background: white; padding: 15px; display: flex; justify-content: center; gap: 30px; border-bottom: 1px solid #eee; position: sticky; top: 45px; z-index: 1000; }
         .nav-bar a { text-decoration: none; color: var(--dark); font-weight: 600; }
+        .out-of-stock-badge { background: #ed1c24; color: white; font-size: 0.8em; font-weight: bold; padding: 4px 10px; border-radius: 20px; display: inline-block; margin-bottom: 8px; }
         #search-overlay { display: none; position: fixed; top: 95px; left: 0; width: 100%; height: calc(100% - 95px); background: white; z-index: 1500; overflow-y: auto; padding: 20px; box-sizing: border-box; text-align: right; }
         .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; margin-top: 20px; }
         .product-card { background: white; border-radius: 15px; padding: 15px; border: 1px solid #f0f0f0; display: flex; flex-direction: column; }
         .product-card img { width: 100%; aspect-ratio: 1/1; object-fit: contain; border-radius: 10px; margin-bottom: 10px; cursor: pointer; }
         .add-btn { background: var(--dark); color: white; border: none; width: 100%; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: auto; }
+        .add-btn:disabled { background: #ccc; cursor: not-allowed; }
         .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
         .page-header { text-align: center; padding: 30px 20px; background: white; border-bottom: 3px solid var(--primary); margin-bottom: 30px; }
         .page-header h1 { margin: 0; color: var(--primary); font-size: 2em; }
@@ -26,13 +28,23 @@
         .gallery img { width: 100%; height: 200px; object-fit: cover; border-radius: 12px; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.08); transition: 0.2s; }
         .gallery img:hover { transform: scale(1.02); }
         .section-title { border-right: 5px solid var(--primary); padding-right: 15px; font-size: 1.4em; margin: 30px 0 20px; }
-        #imgOverlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 5000; justify-content: center; align-items: center; cursor: pointer; }
-        #imgOverlay img { max-width: 90%; max-height: 85%; border: 3px solid white; border-radius: 10px; }
+
+        /* תצוגת תמונה מוגדלת */
+        #imgOverlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.92); z-index: 5000; justify-content: center; align-items: center; flex-direction: column; }
+        #imgOverlay img { max-width: 90%; max-height: 78vh; border: 3px solid white; border-radius: 10px; }
+        #imgOverlay .close-btn { margin-top: 20px; background: white; color: #1a1a1a; border: none; padding: 10px 30px; border-radius: 25px; font-size: 1em; font-weight: bold; cursor: pointer; }
+
         .modal { display: none; position: fixed; z-index: 3000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); }
         .modal-content { background: white; width: 90%; max-width: 450px; margin: 2vh auto; border-radius: 20px; padding: 25px; text-align: right; max-height: 90vh; overflow-y: auto; box-sizing: border-box; }
         .cart-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #eee; }
         .customer-form { margin-top: 15px; padding: 15px; background: #f9f9f9; border-radius: 12px; }
         .customer-form input { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; }
+        /* כפתור תשלום */
+        .payment-section { margin-top: 15px; border-top: 1px solid #eee; padding-top: 15px; }
+        .payment-title { font-size: 0.9em; color: #666; margin-bottom: 10px; text-align: center; }
+        .pay-btn { width: 100%; padding: 14px; border: none; border-radius: 10px; font-size: 1.1em; font-weight: bold; cursor: pointer; margin-bottom: 8px; display: flex; align-items: center; justify-content: center; gap: 8px; transition: opacity 0.2s; }
+        .pay-btn:hover { opacity: 0.9; }
+        .pay-btn-bit { background: #0070f3; color: white; }
         .whatsapp-float { position: fixed; bottom: 25px; left: 25px; background: #25d366; color: white; border-radius: 50px; padding: 14px 20px; font-size: 1em; font-weight: bold; text-decoration: none; box-shadow: 0 4px 15px rgba(37,211,102,0.5); z-index: 4000; display: flex; align-items: center; gap: 8px; transition: transform 0.2s; }
         .whatsapp-float:hover { transform: scale(1.05); }
         #cart-toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(20px); background: #1a1a1a; color: white; padding: 12px 24px; border-radius: 25px; font-size: 1em; font-weight: bold; z-index: 6000; opacity: 0; transition: opacity 0.3s, transform 0.3s; pointer-events: none; white-space: nowrap; }
@@ -82,8 +94,10 @@
     </div>
 </div>
 
-<div id="imgOverlay" onclick="this.style.display='none'">
+<!-- תצוגת תמונה מוגדלת עם כפתור סגירה -->
+<div id="imgOverlay">
     <img id="viewImg" src="">
+    <button class="close-btn" onclick="closeImg()">✕ סגור</button>
 </div>
 
 <div id="cartModal" class="modal">
@@ -104,7 +118,11 @@
         <div style="display:flex;justify-content:space-between;font-size:1.4em;font-weight:bold;margin-top:15px;">
             <span>סה"כ:</span><span>₪<span id="cart-total-modal">0.00</span></span>
         </div>
-        <button onclick="sendToWhatsApp()" style="background:#25d366;color:white;border:none;width:100%;padding:15px;border-radius:10px;font-size:1.2em;font-weight:bold;cursor:pointer;margin-top:15px;">שלח הזמנה בוואטסאפ</button>
+        <button onclick="sendToWhatsApp()" style="background:#25d366;color:white;border:none;width:100%;padding:15px;border-radius:10px;font-size:1.2em;font-weight:bold;cursor:pointer;margin-top:15px;">💬 שלח הזמנה בוואטסאפ</button>
+        <div class="payment-section">
+            <div class="payment-title">💳 או שלם עכשיו:</div>
+            <button class="pay-btn pay-btn-bit" onclick="payWithBit()">🔵 תשלום עם Bit</button>
+        </div>
         <button onclick="toggleCart()" style="width:100%;background:none;border:none;color:#999;cursor:pointer;margin-top:10px;">סגור</button>
     </div>
 </div>
@@ -116,7 +134,33 @@
     let allProducts = [];
     let cart = [];
 
-    function openImg(src) { document.getElementById('viewImg').src = src; document.getElementById('imgOverlay').style.display = 'flex'; }
+    const BIT_NUMBER = '0543191550';
+
+    function openImg(src) {
+        document.getElementById('viewImg').src = src;
+        document.getElementById('imgOverlay').style.display = 'flex';
+    }
+    function closeImg() {
+        document.getElementById('imgOverlay').style.display = 'none';
+    }
+    // סגירה בלחיצה על הרקע
+    document.getElementById('imgOverlay').addEventListener('click', function(e) {
+        if (e.target === this) closeImg();
+    });
+
+    function payWithBit() {
+        const currentCart = JSON.parse(localStorage.getItem('cart')) || [];
+        const name  = document.getElementById('cust-name-cat').value.trim();
+        const phone = document.getElementById('cust-phone-cat').value.trim();
+        if (currentCart.length === 0) return alert("הסל ריק");
+        if (!name || !phone) return alert("בבקשה מלא שם ומספר טלפון");
+        let total = 0;
+        currentCart.forEach(i => { total += extractPrice(i.price) * (i.qty || 1); });
+        const note = encodeURIComponent('הזמנה מ-Up סטוק - ' + name);
+        const url  = 'https://bit.ly/pay/' + BIT_NUMBER + '?amount=' + total.toFixed(2) + '&note=' + note;
+        window.open(url, '_blank');
+        setTimeout(() => sendToWhatsApp(), 1500);
+    }
 
     function showToast(msg) {
         const toast = document.getElementById('cart-toast');
@@ -144,7 +188,8 @@
                     const image    = cols[1]?.trim();
                     const price    = parseFloat(cols[2]?.trim());
                     const category = cols[3]?.trim() || '';
-                    if (name && !isNaN(price)) allProducts.push({ name, image, price, category });
+                    const stock    = cols[4]?.trim() !== '0';
+                    if (name && !isNaN(price)) allProducts.push({ name, image, price, category, stock });
                 }
             }
         } catch (e) { console.error("CSV Load Error", e); }
@@ -164,15 +209,19 @@
         if (filtered.length === 0) { title.innerText = "לא נמצאו תוצאות."; container.innerHTML = ""; return; }
         title.innerText = 'נמצאו ' + filtered.length + ' תוצאות עבור "' + qRaw + '":';
         container.innerHTML = filtered.map(p => {
-            const baseName = p.image ? p.image.replace(/\.(jpg|jpeg)$/i, '') : '';
-            const imgJpg   = baseName ? 'images/products/' + baseName + '.jpg'  : 'images/logo.jpg';
-            const imgJpeg  = baseName ? 'images/products/' + baseName + '.jpeg' : 'images/logo.jpg';
-            const safeName = p.name.replace(/'/g, "\'");
+            const baseName   = p.image ? p.image.replace(/\.(jpg|jpeg)$/i, '') : '';
+            const imgJpg     = baseName ? 'images/products/' + baseName + '.jpg'  : 'images/logo.jpg';
+            const imgJpeg    = baseName ? 'images/products/' + baseName + '.jpeg' : 'images/logo.jpg';
+            const safeName   = p.name.replace(/'/g, "\\'");
+            const outOfStock = !p.stock;
             return '<div class="product-card">' +
-                '<img src="' + imgJpg + '" onerror="this.onerror=null;this.src='' + imgJpeg + '';this.onerror=function(){this.src=\'images/logo.jpg\'}" onclick="openImg(this.src)">' +
+                '<img src="' + imgJpg + '" onerror="this.onerror=null;this.src=\'' + imgJpeg + '\';this.onerror=function(){this.src=\'images/logo.jpg\'}" onclick="openImg(this.src)">' +
+                (outOfStock ? '<div class="out-of-stock-badge">❌ אזל המלאי</div>' : '') +
                 '<h4>' + p.name + '</h4>' +
                 '<div style="color:var(--primary);font-weight:bold;font-size:1.1em;margin-bottom:10px;">₪' + p.price + '</div>' +
-                '<button class="add-btn" onclick="addToCart('' + safeName + '','' + p.price + '')">הוסף לסל +</button>' +
+                (outOfStock
+                    ? '<button class="add-btn" disabled style="background:#ccc;cursor:not-allowed;">אזל המלאי</button>'
+                    : '<button class="add-btn" onclick="addToCart(\'' + safeName + '\',\'' + p.price + '\')">הוסף לסל +</button>') +
                 '</div>';
         }).join('');
     }
