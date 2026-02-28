@@ -65,94 +65,48 @@
 
         <div class="reviews-section">
             <h2>⭐ לקוחות ממליצים</h2>
-            <div class="reviews-grid">
-
-                <div class="review-card">
-                    <span class="review-wa-badge">💬</span>
-                    <div class="review-header">
-                        <div class="review-avatar">מ</div>
-                        <div>
-                            <div class="review-name">מירי כהן</div>
-                            <div class="review-time">לפני 3 ימים</div>
-                        </div>
-                    </div>
-                    <div class="review-stars">★★★★★</div>
-                    <div class="review-text">קניתי ערב לפני האירוע ועוד הגעתי עם רשימה ארוכה 😅 השירות היה מדהים, עזרו לי למצוא הכל תוך דקות. מחירים שאין עליהם!</div>
-                    <span class="review-product-tag">🛍️ כלים לאירוע</span>
-                </div>
-
-                <div class="review-card">
-                    <span class="review-wa-badge">💬</span>
-                    <div class="review-header">
-                        <div class="review-avatar" style="background:#3b82f6;">ד</div>
-                        <div>
-                            <div class="review-name">דוד לוי</div>
-                            <div class="review-time">לפני שבוע</div>
-                        </div>
-                    </div>
-                    <div class="review-stars">★★★★★</div>
-                    <div class="review-text">המבצעים פה אמיתיים! קניתי מגבונים ב-10 ש"ח ל-4 חבילות. בסופר זה היה עולה לי פי 3. חוזר כל שבוע 👍</div>
-                    <span class="review-product-tag">🔥 מבצעים</span>
-                </div>
-
-                <div class="review-card">
-                    <span class="review-wa-badge">💬</span>
-                    <div class="review-header">
-                        <div class="review-avatar" style="background:#8b5cf6;">ש</div>
-                        <div>
-                            <div class="review-name">שירה אברהם</div>
-                            <div class="review-time">לפני שבועיים</div>
-                        </div>
-                    </div>
-                    <div class="review-stars">★★★★★</div>
-                    <div class="review-text">הזמנתי לאירוע בת המצווה של הבת שלי — צלחות, כוסות, קישוטים — הכל ממקום אחד ובמחיר שלא האמנתי. תודה ענקית! 🎉</div>
-                    <span class="review-product-tag">🎂 יום הולדת</span>
-                </div>
-
-                <div class="review-card">
-                    <span class="review-wa-badge">💬</span>
-                    <div class="review-header">
-                        <div class="review-avatar" style="background:#f59e0b;">י</div>
-                        <div>
-                            <div class="review-name">יוסי מזרחי</div>
-                            <div class="review-time">לפני 3 שבועות</div>
-                        </div>
-                    </div>
-                    <div class="review-stars">★★★★★</div>
-                    <div class="review-text">אני מנהל מסעדה קטנה ומגיע לפה כבר שנה לקנות כלים חד פעמיים. הכמויות טובות, האיכות מצוינת והמחיר — אין מה לדבר 💯</div>
-                    <span class="review-product-tag">🍽️ חד פעמי</span>
-                </div>
-
-                <div class="review-card">
-                    <span class="review-wa-badge">💬</span>
-                    <div class="review-header">
-                        <div class="review-avatar" style="background:#ec4899;">ר</div>
-                        <div>
-                            <div class="review-name">רחל פרץ</div>
-                            <div class="review-time">לפני חודש</div>
-                        </div>
-                    </div>
-                    <div class="review-stars">★★★★★</div>
-                    <div class="review-text">מצאתי פה מוצרי אפייה שלא ידעתי שהם קיימים! צבעי ג'ל, תבניות סיליקון, קרמים — גן עדן לכל מי שאוהב לאפות 🎂</div>
-                    <span class="review-product-tag">🧁 אפייה</span>
-                </div>
-
-                <div class="review-card">
-                    <span class="review-wa-badge">💬</span>
-                    <div class="review-header">
-                        <div class="review-avatar" style="background:#10b981;">נ</div>
-                        <div>
-                            <div class="review-name">נועה גולן</div>
-                            <div class="review-time">לפני חודש</div>
-                        </div>
-                    </div>
-                    <div class="review-stars">★★★★★</div>
-                    <div class="review-text">הזמנתי דרך הוואטסאפ וקיבלתי מענה תוך דקות! הכל היה מוכן ומסודר. ממליצה בחום לכולן 🌟</div>
-                    <span class="review-product-tag">💬 שירות</span>
-                </div>
-
+            <div class="reviews-grid" id="reviews-container">
+                <div style="color:#aaa;text-align:center;padding:20px;">טוען ביקורות...</div>
             </div>
         </div>
+
+        <script>
+        async function loadReviews() {
+            try {
+                const res  = await fetch('reviews.csv?t=' + Date.now());
+                const text = await res.text();
+                const rows = text.split('\n').filter(r => r.trim());
+                const container = document.getElementById('reviews-container');
+                container.innerHTML = '';
+                for (let i = 1; i < rows.length; i++) {
+                    // פיצול חכם — מתחשב בפסיקים בתוך טקסט
+                    const cols = rows[i].match(/(".*?"|[^,]+)(?=,|$)/g);
+                    if (!cols || cols.length < 5) continue;
+                    const name  = cols[0].trim().replace(/^"|"$/g, '');
+                    const text  = cols[1].trim().replace(/^"|"$/g, '');
+                    const topic = cols[2].trim().replace(/^"|"$/g, '');
+                    const color = cols[3].trim().replace(/^"|"$/g, '');
+                    const time  = cols[4].trim().replace(/^"|"$/g, '');
+                    const initial = name.charAt(0);
+                    container.innerHTML += `
+                        <div class="review-card">
+                            <span class="review-wa-badge">💬</span>
+                            <div class="review-header">
+                                <div class="review-avatar" style="background:${color};">${initial}</div>
+                                <div>
+                                    <div class="review-name">${name}</div>
+                                    <div class="review-time">${time}</div>
+                                </div>
+                            </div>
+                            <div class="review-stars">★★★★★</div>
+                            <div class="review-text">${text}</div>
+                            <span class="review-product-tag">${topic}</span>
+                        </div>`;
+                }
+            } catch(e) { console.error('Reviews load error', e); }
+        }
+        loadReviews();
+        </script>
     </div>
 
 </body>
