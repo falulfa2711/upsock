@@ -25,12 +25,18 @@
         .dept-card img { width: 100%; height: 150px; object-fit: cover; }
         .dept-card h3 { margin: 10px 0 14px; font-size: 1.1em; }
 
-        .gallery-section { margin-top: 50px; }
-        .gallery-section h2 { text-align: right; border-right: 5px solid #ed1c24; padding-right: 15px; margin-bottom: 20px; }
-        .shop-gallery { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 40px; }
-        @media (max-width: 600px) { .shop-gallery { grid-template-columns: repeat(2, 1fr); } }
-        .shop-gallery img { width: 100%; height: 160px; object-fit: cover; border-radius: 10px; cursor: pointer; transition: 0.2s; }
-        .shop-gallery img:hover { transform: scale(1.03); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        .reviews-section { margin-top: 50px; margin-bottom: 40px; }
+        .reviews-section h2 { text-align: right; border-right: 5px solid #ed1c24; padding-right: 15px; margin-bottom: 25px; }
+        .reviews-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
+        .review-card { background: white; border-radius: 16px; padding: 18px; box-shadow: 0 2px 12px rgba(0,0,0,0.07); position: relative; }
+        .review-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+        .review-avatar { width: 42px; height: 42px; border-radius: 50%; background: #25d366; color: white; display: flex; align-items: center; justify-content: center; font-size: 1.2em; font-weight: bold; flex-shrink: 0; }
+        .review-name { font-weight: 700; font-size: 0.95em; }
+        .review-time { font-size: 0.75em; color: #aaa; }
+        .review-stars { color: #f5a623; font-size: 1em; margin-bottom: 8px; }
+        .review-text { font-size: 0.92em; color: #444; line-height: 1.55; }
+        .review-wa-badge { position: absolute; top: 14px; left: 14px; color: #25d366; font-size: 1.1em; }
+        .review-product-tag { display: inline-block; background: #f0f0f0; color: #666; font-size: 0.75em; border-radius: 10px; padding: 2px 10px; margin-top: 8px; }
     </style>
     <script src="common.js" defer></script>
 </head>
@@ -57,26 +63,94 @@
             <a href="birthday.html" class="dept-card"><img src="images/bday1.jpeg"><h3>ימי הולדת</h3></a>
         </div>
 
-        <div class="gallery-section">
-            <h2>החנות שלנו</h2>
-            <div class="shop-gallery">
-                <img src="images/shop1.jpg"  onclick="openImg(this.src)" onerror="this.style.display='none'">
-                <img src="images/shop2.jpg"  onclick="openImg(this.src)" onerror="this.style.display='none'">
-                <img src="images/shop3.jpg"  onclick="openImg(this.src)" onerror="this.style.display='none'">
-                <img src="images/shop4.jpg"  onclick="openImg(this.src)" onerror="this.style.display='none'">
-                <img src="images/shop5.jpg"  onclick="openImg(this.src)" onerror="this.style.display='none'">
-                <img src="images/shop6.jpg"  onclick="openImg(this.src)" onerror="this.style.display='none'">
-                <img src="images/shop7.jpg"  onclick="openImg(this.src)" onerror="this.style.display='none'">
-                <img src="images/shop8.jpg"  onclick="openImg(this.src)" onerror="this.style.display='none'">
-                <img src="images/shop9.jpg"  onclick="openImg(this.src)" onerror="this.style.display='none'">
-                <img src="images/shop10.jpg" onclick="openImg(this.src)" onerror="this.style.display='none'">
-                <img src="images/shop11.jpg" onclick="openImg(this.src)" onerror="this.style.display='none'">
-                <img src="images/shop12.jpg" onclick="openImg(this.src)" onerror="this.style.display='none'">
-                <img src="images/shop13.jpg" onclick="openImg(this.src)" onerror="this.style.display='none'">
-                <img src="images/shop14.jpg" onclick="openImg(this.src)" onerror="this.style.display='none'">
-                <img src="images/shop15.jpg" onclick="openImg(this.src)" onerror="this.style.display='none'">
-                <img src="images/shop16.jpg" onclick="openImg(this.src)" onerror="this.style.display='none'">
-                <img src="images/shop17.jpg" onclick="openImg(this.src)" onerror="this.style.display='none'">
+        <div class="reviews-section">
+            <h2>⭐ לקוחות ממליצים</h2>
+            <div class="reviews-grid">
+
+                <div class="review-card">
+                    <span class="review-wa-badge">💬</span>
+                    <div class="review-header">
+                        <div class="review-avatar">מ</div>
+                        <div>
+                            <div class="review-name">מירי כהן</div>
+                            <div class="review-time">לפני 3 ימים</div>
+                        </div>
+                    </div>
+                    <div class="review-stars">★★★★★</div>
+                    <div class="review-text">קניתי ערב לפני האירוע ועוד הגעתי עם רשימה ארוכה 😅 השירות היה מדהים, עזרו לי למצוא הכל תוך דקות. מחירים שאין עליהם!</div>
+                    <span class="review-product-tag">🛍️ כלים לאירוע</span>
+                </div>
+
+                <div class="review-card">
+                    <span class="review-wa-badge">💬</span>
+                    <div class="review-header">
+                        <div class="review-avatar" style="background:#3b82f6;">ד</div>
+                        <div>
+                            <div class="review-name">דוד לוי</div>
+                            <div class="review-time">לפני שבוע</div>
+                        </div>
+                    </div>
+                    <div class="review-stars">★★★★★</div>
+                    <div class="review-text">המבצעים פה אמיתיים! קניתי מגבונים ב-10 ש"ח ל-4 חבילות. בסופר זה היה עולה לי פי 3. חוזר כל שבוע 👍</div>
+                    <span class="review-product-tag">🔥 מבצעים</span>
+                </div>
+
+                <div class="review-card">
+                    <span class="review-wa-badge">💬</span>
+                    <div class="review-header">
+                        <div class="review-avatar" style="background:#8b5cf6;">ש</div>
+                        <div>
+                            <div class="review-name">שירה אברהם</div>
+                            <div class="review-time">לפני שבועיים</div>
+                        </div>
+                    </div>
+                    <div class="review-stars">★★★★★</div>
+                    <div class="review-text">הזמנתי לאירוע בת המצווה של הבת שלי — צלחות, כוסות, קישוטים — הכל ממקום אחד ובמחיר שלא האמנתי. תודה ענקית! 🎉</div>
+                    <span class="review-product-tag">🎂 יום הולדת</span>
+                </div>
+
+                <div class="review-card">
+                    <span class="review-wa-badge">💬</span>
+                    <div class="review-header">
+                        <div class="review-avatar" style="background:#f59e0b;">י</div>
+                        <div>
+                            <div class="review-name">יוסי מזרחי</div>
+                            <div class="review-time">לפני 3 שבועות</div>
+                        </div>
+                    </div>
+                    <div class="review-stars">★★★★★</div>
+                    <div class="review-text">אני מנהל מסעדה קטנה ומגיע לפה כבר שנה לקנות כלים חד פעמיים. הכמויות טובות, האיכות מצוינת והמחיר — אין מה לדבר 💯</div>
+                    <span class="review-product-tag">🍽️ חד פעמי</span>
+                </div>
+
+                <div class="review-card">
+                    <span class="review-wa-badge">💬</span>
+                    <div class="review-header">
+                        <div class="review-avatar" style="background:#ec4899;">ר</div>
+                        <div>
+                            <div class="review-name">רחל פרץ</div>
+                            <div class="review-time">לפני חודש</div>
+                        </div>
+                    </div>
+                    <div class="review-stars">★★★★★</div>
+                    <div class="review-text">מצאתי פה מוצרי אפייה שלא ידעתי שהם קיימים! צבעי ג'ל, תבניות סיליקון, קרמים — גן עדן לכל מי שאוהב לאפות 🎂</div>
+                    <span class="review-product-tag">🧁 אפייה</span>
+                </div>
+
+                <div class="review-card">
+                    <span class="review-wa-badge">💬</span>
+                    <div class="review-header">
+                        <div class="review-avatar" style="background:#10b981;">נ</div>
+                        <div>
+                            <div class="review-name">נועה גולן</div>
+                            <div class="review-time">לפני חודש</div>
+                        </div>
+                    </div>
+                    <div class="review-stars">★★★★★</div>
+                    <div class="review-text">הזמנתי דרך הוואטסאפ וקיבלתי מענה תוך דקות! הכל היה מוכן ומסודר. ממליצה בחום לכולן 🌟</div>
+                    <span class="review-product-tag">💬 שירות</span>
+                </div>
+
             </div>
         </div>
     </div>
