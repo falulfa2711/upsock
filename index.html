@@ -15,9 +15,12 @@
         .tagline p { margin: 0; font-size: 1.15em; color: #555; font-weight: 500; }
         .tagline strong { color: #ed1c24; }
 
-        .promo-banner { background: linear-gradient(135deg, #ed1c24, #c0392b); color: white; text-align: center; padding: 14px 20px; display: flex; justify-content: center; align-items: center; gap: 15px; flex-wrap: wrap; }
-        .promo-banner span { font-size: 1.05em; font-weight: 600; }
-        .promo-banner a { background: white; color: #ed1c24; text-decoration: none; font-weight: 800; padding: 7px 18px; border-radius: 20px; font-size: 0.95em; white-space: nowrap; }
+        .ticker-wrap { background: linear-gradient(135deg, #ed1c24, #c0392b); color: white; padding: 11px 0; overflow: hidden; white-space: nowrap; position: relative; }
+        .ticker-track { display: inline-block; animation: ticker-scroll 30s linear infinite; }
+        .ticker-track:hover { animation-play-state: paused; }
+        .ticker-item { display: inline-block; padding: 0 50px; font-size: 1.05em; font-weight: 600; }
+        .ticker-item::before { content: '◆'; margin-left: 50px; opacity: 0.6; font-size: 0.7em; }
+        @keyframes ticker-scroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
 
         .dept-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 20px; margin: 40px 0; }
         .dept-card { background: white; border-radius: 15px; overflow: hidden; text-decoration: none; color: inherit; transition: 0.25s; box-shadow: 0 4px 10px rgba(0,0,0,0.07); text-align: center; }
@@ -50,10 +53,37 @@
         <p>הכל לבית, לאירוע ולמטבח — <strong>במחיר שמשתלם</strong> 🛍️</p>
     </div>
 
-    <div class="promo-banner">
-        <span>🔥 יש מבצעים חמים השבוע!</span>
-        <a href="promos.html">לכל המבצעים ←</a>
+    <div class="ticker-wrap">
+        <div class="ticker-track" id="ticker-track">
+            <span class="ticker-item">טוען הודעות...</span>
+        </div>
     </div>
+
+    <script>
+    async function loadTicker() {
+        try {
+            const res  = await fetch('ticker.csv?t=' + Date.now());
+            const text = await res.text();
+            const rows = text.split('\n').filter(r => r.trim());
+            const messages = [];
+            for (let i = 1; i < rows.length; i++) {
+                const lastComma = rows[i].lastIndexOf(',');
+                if (lastComma === -1) continue;
+                const msg = rows[i].substring(0, lastComma).trim().replace(/^"|"$/g, '');
+                if (msg) messages.push(msg);
+            }
+            if (!messages.length) return;
+            const html = [...messages, ...messages].map(m =>
+                '<span class="ticker-item">' + m + '</span>'
+            ).join('');
+            const track = document.getElementById('ticker-track');
+            track.innerHTML = html;
+            const duration = Math.max(20, messages.length * 8);
+            track.style.animationDuration = duration + 's';
+        } catch(e) { console.error('Ticker load error', e); }
+    }
+    loadTicker();
+    </script>
 
     <div class="container" id="main-content">
         <div class="dept-grid">
