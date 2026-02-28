@@ -67,9 +67,9 @@
             const rows = text.split('\n').filter(r => r.trim());
             const messages = [];
             for (let i = 1; i < rows.length; i++) {
-                const lastComma = rows[i].lastIndexOf(',');
-                if (lastComma === -1) continue;
-                const msg = rows[i].substring(0, lastComma).trim().replace(/^"|"$/g, '');
+                const firstComma = rows[i].indexOf(',');
+                if (firstComma === -1) continue;
+                const msg = rows[i].substring(0, firstComma).trim().replace(/^"|"$/g, '');
                 if (msg) messages.push(msg);
             }
             if (!messages.length) return;
