@@ -53,8 +53,10 @@ function injectCommonHTML() {
     nav.innerHTML = `
         <a href="index.html">🏠 בית</a>
         <a href="promos.html" style="color:#ed1c24;font-weight:800;">🔥 מבצעים</a>
+        <a href="policy.html">📋 מדיניות</a>
         <a href="about.html">ℹ️ אודות</a>
         <a href="contact.html">📞 צור קשר</a>
+        <a href="policy.html">📋 מדיניות</a>
         <a href="reviews.html">⭐ חוות דעת</a>`;
     document.body.insertBefore(nav, header.nextSibling);
 
