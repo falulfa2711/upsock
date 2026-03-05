@@ -56,7 +56,6 @@ function injectCommonHTML() {
         <a href="policy.html">📋 מדיניות</a>
         <a href="about.html">ℹ️ אודות</a>
         <a href="contact.html">📞 צור קשר</a>
-        <a href="policy.html">📋 מדיניות</a>
         <a href="reviews.html">⭐ חוות דעת</a>`;
     document.body.insertBefore(nav, header.nextSibling);
 
