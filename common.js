@@ -13,6 +13,7 @@ const DELIVERY_COST = 15;
 let deliveryMode = 'pickup'; // 'pickup' or 'delivery'
 let allProducts = [];
 let barcodeToCategory = {};   // barcode -> Hebrew category
+let allPromos = [];           // loaded from stock_promos.csv
 let activeCategory = null;    // currently selected category filter
 let cart = [];
 
@@ -268,6 +269,28 @@ function showToast(msg) {
 
 function addToCart(name, price, units) {
     cart = JSON.parse(localStorage.getItem('cart')) || [];
+
+    // Check if this product has a promo
+    const promo = findPromoForProduct(name);
+    if (promo && promo.unitPrice > 0) {
+        // Extract promo total price from promo string e.g. "מבצע 2 ב-22" -> 22
+        const promoMatch = promo.promo.match(/ב[-\s]?(\d+)/);
+        const promoPrice = promoMatch ? parseFloat(promoMatch[1]) : null;
+        if (promoPrice) {
+            const existing = cart.find(i => i.name === name);
+            if (existing) {
+                existing.qty++;
+            } else {
+                cart.push({ name, unitPrice: promo.unitPrice, promoPrice, units: promo.units, qty: 1, isPromo: true });
+            }
+            localStorage.setItem('cart', JSON.stringify(cart));
+            updateUI();
+            showToast('🔥 ' + name.substring(0, 20) + ' נוסף במחיר מבצע!');
+            return;
+        }
+    }
+
+    // No promo - regular price
     const existing = cart.find(i => i.name === name);
     if (existing) { existing.qty++; } else { cart.push({ name, price, qty: 1, units: units || null }); }
     localStorage.setItem('cart', JSON.stringify(cart));
@@ -456,6 +479,52 @@ function payWithBit() {
 // ===================================================
 // 🔍  חיפוש עברי
 // ===================================================
+// ===================================================
+// 🔤  מילון נרדפות לחיפוש
+// ===================================================
+const SYNONYMS = {
+    'מגבת':   ['מפיות', 'מפית', 'ניגוב', 'סושי'],
+    'מגבות':  ['מפיות', 'מפית', 'ניגוב', 'סושי'],
+    'נייר מגבת': ['סושי', 'מפיות'],
+    'מפיות':  ['מגבת', 'מגבות', 'סושי'],
+    'מפית':   ['מגבת', 'מגבות'],
+    'כוס':    ['גביע', 'כוסות'],
+    'כוסות':  ['גביע', 'כוס'],
+    'גביע':   ['כוס', 'כוסות'],
+    'צלחת':   ['צלחות'],
+    'צלחות':  ['צלחת'],
+    'שקית':   ['שקיות', 'קסרול', 'שק'],
+    'שקיות':  ['שקית'],
+    'סכין':   ['סכינים'],
+    'סכינים': ['סכין'],
+    'מזלג':   ['מזלגות'],
+    'מזלגות': ['מזלג'],
+    'כף':     ['כפות', 'כפיות'],
+    'כפות':   ['כף'],
+    'כפית':   ['כפיות'],
+    'כפיות':  ['כפית', 'כף'],
+    'סבון':   ['שמפו', 'ניקוי'],
+    'שמפו':   ['סבון'],
+    'ניקוי':  ['סבון', 'שמפו'],
+    'קסרול':  ['שקית', 'מנה'],
+    'נר':     ['נרות'],
+    'נרות':   ['נר'],
+    'בלון':   ['בלונים'],
+    'בלונים': ['בלון'],
+    'תבנית':  ['תבניות'],
+    'תבניות': ['תבנית'],
+};
+
+function expandQuery(words) {
+    // Return original words + synonyms as one flat array (deduped)
+    const all = new Set(words);
+    words.forEach(w => {
+        const syns = SYNONYMS[w];
+        if (syns) syns.forEach(s => all.add(s));
+    });
+    return Array.from(all);
+}
+
 function fix(s)         { return s.replace(/ך/g,'כ').replace(/ם/g,'מ').replace(/ן/g,'נ').replace(/ף/g,'פ').replace(/ץ/g,'צ'); }
 function removePunct(s) { return s.replace(/['\-\.,"]/g, ''); }
 function normSmichut(s) { return s.replace(/ת(\s|$)/g, 'א$1').replace(/ת$/g, 'א'); }
@@ -537,6 +606,39 @@ function loadCategories() {
         }).catch(() => {});
 }
 
+function loadPromos() {
+    fetch('stock_promos.csv?t=' + Date.now())
+        .then(r => r.text())
+        .then(text => {
+            const lines = text.split('\n').filter(l => l.trim());
+            lines.forEach((line, i) => {
+                if (i === 0) return; // skip header
+                // name,promo,image,qty,unit_price
+                const parts = line.split(',');
+                if (parts.length >= 4) {
+                    allPromos.push({
+                        name:       parts[0].trim(),
+                        promo:      parts[1].trim(),
+                        image:      parts[2].trim(),
+                        units:      parseInt(parts[3].trim()) || 1,
+                        unitPrice:  parseFloat(parts[4]) || 0
+                    });
+                }
+            });
+        }).catch(() => {});
+}
+
+function findPromoForProduct(name) {
+    // Exact name match
+    const exact = allPromos.find(p => p.name === name);
+    if (exact) return exact;
+    // Partial match (product name contains promo name or vice versa)
+    const partial = allPromos.find(p =>
+        name.includes(p.name) || p.name.includes(name)
+    );
+    return partial || null;
+}
+
 function syncSearch(val) {
     const overlay   = document.getElementById('search-overlay');
     const container = document.getElementById('search-results-container');
@@ -545,16 +647,74 @@ function syncSearch(val) {
     if (!qRaw || qRaw.length < 2) { overlay.style.display = "none"; return; }
     overlay.style.display = "block";
     const qFixed     = fix(qRaw);
-    const queryWords = qFixed.split(' ').filter(w => w.length > 0);
-    const queryStems = queryWords.map(w => { const n = removePunct(normSmichut(w)); return n.length > 3 ? n.substring(0, 3) : n; });
+    const rawWords   = qFixed.split(' ').filter(w => w.length > 0);
+    // Expand with synonyms — search for original words AND synonyms
+    const queryWords = expandQuery(rawWords);
+
+    // Build stems: keep longer prefix for better matching (4 chars instead of 3)
+    // Also keep original word alongside stem for flexible matching
+    const queryTerms = rawWords.map(w => {
+        const cleaned = removePunct(fix(w));
+        const stemmed = removePunct(normSmichut(fix(w)));
+        // Use up to 4-char stem, but also try the raw cleaned word
+        const stem = stemmed.length > 4 ? stemmed.substring(0, 4) : stemmed;
+        const shortStem = stemmed.length > 3 ? stemmed.substring(0, 3) : stemmed;
+        return { original: cleaned, stem, shortStem };
+    });
+
     const filtered   = allProducts.filter(p => {
         // Category filter
         if (activeCategory) {
             const pCat = getCategoryForProduct(p);
             if (pCat !== activeCategory) return false;
         }
-        const pFixed = removePunct(normSmichut(fix(p.name.toLowerCase())));
-        return queryStems.every(stem => pFixed.includes(stem));
+        const pName    = p.name.toLowerCase();
+        const pFixed   = removePunct(fix(pName));
+        const pStemmed = removePunct(normSmichut(fix(pName)));
+
+        // Match function for a single term against product name
+        const termMatch = ({ original, stem, shortStem }) =>
+            pFixed.includes(original) ||
+            pStemmed.includes(stem) ||
+            pFixed.includes(shortStem) ||
+            pStemmed.includes(shortStem);
+
+        // Also check if any synonym word appears in the product name
+        const synonymMatch = (word) => {
+            const syns = SYNONYMS[word] || [];
+            return syns.some(s => {
+                const sf = removePunct(fix(s));
+                const ss = removePunct(normSmichut(fix(s)));
+                return pFixed.includes(sf) || pStemmed.includes(ss) ||
+                       pFixed.includes(sf.substring(0,3)) || pStemmed.includes(ss.substring(0,3));
+            });
+        };
+
+        const termOrSynMatch = (term) => termMatch(term) || synonymMatch(term.original);
+
+        // AND match: all words found in product (strict, including synonyms)
+        if (queryTerms.every(termOrSynMatch)) return true;
+
+        // OR fallback for multi-word queries
+        if (queryTerms.length > 1 && queryTerms.some(termOrSynMatch)) return true;
+
+        return false;
+    });
+
+    // Sort: most matching terms first
+    filtered.sort((a, b) => {
+        const score = p => {
+            const pF = removePunct(fix(p.name.toLowerCase()));
+            const pS = removePunct(normSmichut(fix(p.name.toLowerCase())));
+            const tm = ({ original, stem, shortStem }) =>
+                pF.includes(original) || pS.includes(stem) || pF.includes(shortStem) || pS.includes(shortStem);
+            const sm = (word) => (SYNONYMS[word]||[]).some(s => {
+                const sf=removePunct(fix(s)); const ss=removePunct(normSmichut(fix(s)));
+                return pF.includes(sf)||pS.includes(ss)||pF.includes(sf.substring(0,3))||pS.includes(ss.substring(0,3));
+            });
+            return queryTerms.filter(t => tm(t) || sm(t.original)).length;
+        };
+        return score(b) - score(a);
     });
     if (filtered.length === 0) { title.innerText = "לא נמצאו תוצאות ל: " + qRaw; container.innerHTML = ""; return; }
     title.innerText = `נמצאו ${filtered.length} תוצאות עבור "${qRaw}":`;
@@ -596,6 +756,7 @@ async function loadInventory() {
         const rows = text.split('\n').filter(r => r.trim());
         allProducts = [];
         loadCategories();
+        loadPromos();
         for (let i = 1; i < rows.length; i++) {
             const cols = rows[i].split(',');
             if (cols.length >= 3) {
