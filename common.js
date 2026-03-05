@@ -393,18 +393,27 @@ function toggleCatMenu(e) {
 }
 function filterByCategory(cat) {
     activeCategory = cat;
-    // Update button styles
+
+    // Highlight active button inside menu
     document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
-    if (!cat) {
-        const all = document.getElementById('catAll');
-        if (all) all.classList.add('active');
-    } else {
-        document.querySelectorAll('.cat-btn').forEach(b => {
-            if (b.textContent.includes(cat.substring(0,4))) b.classList.add('active');
-        });
+    const clickedBtn = event && event.target ? event.target : null;
+    if (clickedBtn && clickedBtn.classList.contains('cat-btn')) clickedBtn.classList.add('active');
+
+    // Update toggle button label
+    const toggleBtn = document.getElementById('catToggleBtn');
+    if (toggleBtn) {
+        if (!cat) {
+            toggleBtn.textContent = '\uD83D\uDCC2 קטגוריה \u25BE';
+            toggleBtn.style.background = '#ed1c24';
+        } else {
+            const label = clickedBtn ? clickedBtn.textContent.trim() : cat;
+            toggleBtn.textContent = label + ' \u2715';
+            toggleBtn.style.background = '#c0392b';
+        }
     }
+
     // Trigger search with current input value
-    const q = document.getElementById('mainSearchInput')?.value || '';
+    const q = document.getElementById('mainSearchInput') ? document.getElementById('mainSearchInput').value : '';
     syncSearch(q);
     closeCatMenu();
 }
