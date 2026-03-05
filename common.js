@@ -7,6 +7,10 @@ const WHATSAPP_NUMBER = '972549397753';
 const BIT_NUMBER      = '0543191550';
 const PAYBOX_NUMBER   = 'YOUR_PAYBOX_NUMBER';
 
+const DELIVERY_MIN = 100;
+const DELIVERY_FREE = 300;
+const DELIVERY_COST = 15;
+let deliveryMode = 'pickup'; // 'pickup' or 'delivery'
 let allProducts = [];
 let barcodeToCategory = {};   // barcode -> Hebrew category
 let activeCategory = null;    // currently selected category filter
@@ -93,8 +97,31 @@ function injectCommonHTML() {
                 <input type="text" id="cust-name" placeholder="הכנס שם מלא">
                 <label>📞 טלפון (חובה):</label>
                 <input type="tel" id="cust-phone" placeholder="מספר ליצירת קשר">
-                <label>📍 עיר / שכונה:</label>
-                <input type="text" id="cust-loc" placeholder="לאן להגיע?">
+                <div style="display:flex;gap:8px;margin-bottom:10px;">
+                    <button type="button" id="btn-pickup" onclick="setDeliveryMode('pickup')"
+                        style="flex:1;padding:10px;border:2px solid #ed1c24;border-radius:8px;background:#ed1c24;color:white;font-weight:bold;cursor:pointer;font-family:inherit;">
+                        🏪 איסוף עצמי
+                    </button>
+                    <button type="button" id="btn-delivery" onclick="setDeliveryMode('delivery')"
+                        style="flex:1;padding:10px;border:2px solid #ed1c24;border-radius:8px;background:white;color:#ed1c24;font-weight:bold;cursor:pointer;font-family:inherit;">
+                        🚚 משלוח
+                    </button>
+                </div>
+                <div id="delivery-fields" style="display:none;">
+                    <div id="delivery-info-box" style="background:#fff8e1;border:1px solid #ffc107;border-radius:8px;padding:10px;margin-bottom:10px;font-size:0.88em;line-height:1.7;">
+                        📦 <b>תנאי משלוח:</b><br>
+                        • מינימום הזמנה למשלוח: <b>₪100</b><br>
+                        • עלות משלוח: <b>₪15</b> (שליח חיצוני)<br>
+                        • משלוח חינם בהזמנה מעל <b>₪300</b><br>
+                        • 📍 אזור משלוח: <b>בקעת אונו בלבד</b>
+                    </div>
+                    <label>📍 כתובת למשלוח (חובה):</label>
+                    <input type="text" id="cust-loc" placeholder="רחוב, מספר, עיר">
+                    <div id="delivery-cost-note" style="color:#25a244;font-weight:bold;font-size:0.9em;margin-bottom:8px;display:none;"></div>
+                </div>
+                <div id="pickup-fields">
+                    <input type="text" id="cust-loc-pickup" placeholder="עיר / שכונה (אופציונלי)" style="width:100%;padding:10px;border:1px solid #ccc;border-radius:8px;box-sizing:border-box;">
+                </div>
             </div>
             <div style="display:flex;justify-content:space-between;font-size:1.4em;font-weight:bold;margin-top:15px;">
                 <span>סה"כ:</span><span>₪<span id="cart-total-modal">0.00</span></span>
@@ -222,6 +249,7 @@ function updateUI() {
     document.getElementById('cart-total-header').innerText = total.toFixed(2);
     document.getElementById('cart-total-modal').innerText = total.toFixed(2);
     document.getElementById('cart-items-list').innerHTML = itemsHtml || '<div style="text-align:center;padding:20px;color:#888;">הסל ריק</div>';
+    updateDeliveryCostNote();
 }
 
 function showToast(msg) {
@@ -306,10 +334,57 @@ function getOrderDetails() {
     return { currentCart, name, phone, location, total };
 }
 
+function setDeliveryMode(mode) {
+    deliveryMode = mode;
+    const btnPickup   = document.getElementById('btn-pickup');
+    const btnDelivery = document.getElementById('btn-delivery');
+    const dFields     = document.getElementById('delivery-fields');
+    const pFields     = document.getElementById('pickup-fields');
+    if (mode === 'delivery') {
+        btnDelivery.style.background = '#ed1c24';
+        btnDelivery.style.color      = 'white';
+        btnPickup.style.background   = 'white';
+        btnPickup.style.color        = '#ed1c24';
+        dFields.style.display = 'block';
+        pFields.style.display = 'none';
+    } else {
+        btnPickup.style.background   = '#ed1c24';
+        btnPickup.style.color        = 'white';
+        btnDelivery.style.background = 'white';
+        btnDelivery.style.color      = '#ed1c24';
+        dFields.style.display = 'none';
+        pFields.style.display = 'block';
+    }
+    updateDeliveryCostNote();
+}
+
+function updateDeliveryCostNote() {
+    const note = document.getElementById('delivery-cost-note');
+    if (!note) return;
+    const { total } = getOrderDetails();
+    if (deliveryMode !== 'delivery') { note.style.display='none'; return; }
+    note.style.display = 'block';
+    if (total >= DELIVERY_FREE) {
+        note.style.color = '#25a244';
+        note.textContent = '🎉 משלוח חינם! (הזמנה מעל ₪' + DELIVERY_FREE + ')';
+    } else {
+        note.style.color = '#e67e22';
+        note.textContent = '🚚 עלות משלוח: ₪' + DELIVERY_COST + ' | חינם מעל ₪' + DELIVERY_FREE;
+    }
+}
+
 function validateOrder() {
-    const { currentCart, name, phone } = getOrderDetails();
+    const { currentCart, name, phone, total } = getOrderDetails();
     if (currentCart.length === 0) { alert("הסל ריק"); return false; }
     if (!name || !phone) { alert("בבקשה מלא שם ומספר טלפון"); return false; }
+    if (deliveryMode === 'delivery') {
+        const addr = document.getElementById('cust-loc') ? document.getElementById('cust-loc').value.trim() : '';
+        if (!addr) { alert("בבקשה הכנס כתובת למשלוח"); return false; }
+        if (total < DELIVERY_MIN) {
+            alert("מינימום הזמנה למשלוח: ₪" + DELIVERY_MIN + "\nסך ההזמנה שלך: ₪" + total.toFixed(2));
+            return false;
+        }
+    }
     return true;
 }
 
@@ -317,7 +392,16 @@ function buildWhatsAppMsg() {
     const { currentCart, name, phone, location, total } = getOrderDetails();
     let msg = "*הזמנה חדשה מאתר Up סטוק*\n--------------------------\n";
     msg += `👤 *שם:* ${name}\n📞 *טלפון:* ${phone}\n`;
-    if (location) msg += `📍 *מיקום:* ${location}\n`;
+    if (deliveryMode === 'delivery') {
+        const addr = document.getElementById('cust-loc') ? document.getElementById('cust-loc').value.trim() : location;
+        const deliveryCost = total >= DELIVERY_FREE ? 0 : DELIVERY_COST;
+        msg += `🚚 *משלוח לכתובת:* ${addr}\n`;
+        msg += deliveryCost === 0 ? `📦 *עלות משלוח:* חינם 🎉\n` : `📦 *עלות משלוח:* ₪${deliveryCost}\n`;
+    } else {
+        msg += `🏪 *איסוף עצמי מהחנות*\n`;
+        const pickupLoc = document.getElementById('cust-loc-pickup') ? document.getElementById('cust-loc-pickup').value.trim() : '';
+        if (pickupLoc) msg += `📍 *אזור:* ${pickupLoc}\n`;
+    }
     msg += "--------------------------\n";
     currentCart.forEach(i => {
         const q = i.qty || 1;
@@ -336,7 +420,11 @@ function buildWhatsAppMsg() {
             msg += `• ${i.name}\n  כמות: ${q} | סה"כ: ₪${(p * q).toFixed(2)}\n`;
         }
     });
-    msg += `--------------------------\n💰 *סה"כ לתשלום: ₪${total.toFixed(2)}*`;
+    const deliveryCost = (deliveryMode === 'delivery' && total < DELIVERY_FREE) ? DELIVERY_COST : 0;
+    const grandTotal = total + deliveryCost;
+    msg += `--------------------------\n💰 *סה"כ מוצרים: ₪${total.toFixed(2)}*`;
+    if (deliveryCost > 0) msg += `\n🚚 *משלוח: ₪${deliveryCost}*`;
+    msg += `\n💳 *סה"כ לתשלום: ₪${grandTotal.toFixed(2)}*`;
     return msg;
 }
 
