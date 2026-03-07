@@ -11,7 +11,23 @@
         .logo-section { padding: 30px 20px 20px; text-align: center; background: white; }
         .logo-section img { max-width: 400px; width: 100%; border-radius: 20px; }
 
-        .tagline { text-align: center; background: white; padding: 0 20px 25px; }
+        /* === באנר פסח === */
+        .pesach-banner {
+            text-align: center;
+            background: white;
+            padding: 10px 20px 0;
+        }
+        .pesach-banner img {
+            width: 100%;
+            max-width: 900px;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.10);
+        }
+
+        .tagline { text-align: center; background: white; padding: 15px 20px 25px; }
         .tagline p { margin: 0; font-size: 1.15em; color: #555; font-weight: 500; }
         .tagline strong { color: #ed1c24; }
 
@@ -50,7 +66,7 @@
         .social-links { display: flex; gap: 14px; margin-top: 8px; }
         .social-btn { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.3em; text-decoration: none; transition: transform 0.2s, opacity 0.2s; }
         .social-btn:hover { transform: scale(1.15); opacity: 0.85; }
-        .social-tiktok  { background: #010101; color: white; border: 1px solid #333; }
+        .social-tiktok { background: #010101; color: white; border: 1px solid #333; }
         .social-facebook { background: #1877f2; color: white; }
         .social-whatsapp { background: #25d366; color: white; }
         .footer-bottom { text-align: center; margin-top: 30px; padding-top: 16px; border-top: 1px solid #333; font-size: 0.8em; color: #666; }
@@ -59,132 +75,135 @@
 </head>
 <body>
 
-    <div class="logo-section">
-        <img src="images/logo.jpg" alt="Up Stock Logo">
+<div class="logo-section">
+    <img src="images/logo.jpg" alt="Up Stock Logo">
+</div>
+
+<!-- באנר פסח -->
+<div class="pesach-banner">
+    <img src="images/pesach-banner.png" alt="חג פסח שמח - השולחן ערוך, אתם רק צריכים לשבת | מבחר כלים חד פעמיים מעוצבים">
+</div>
+
+<div class="tagline">
+    <p>הכל לבית, לאירוע ולמטבח — <strong>במחיר שמשתלם</strong> 🛍️</p>
+</div>
+
+<div class="ticker-wrap">
+    <div class="ticker-track" id="ticker-track">
+        <span class="ticker-item">טוען הודעות...</span>
+    </div>
+</div>
+<script>
+async function loadTicker() {
+    try {
+        const res = await fetch('ticker.csv?t=' + Date.now());
+        const text = await res.text();
+        const rows = text.split('\n').filter(r => r.trim());
+        const messages = [];
+        for (let i = 1; i < rows.length; i++) {
+            const firstComma = rows[i].indexOf(',');
+            if (firstComma === -1) continue;
+            const msg = rows[i].substring(0, firstComma).trim().replace(/^"|"$/g, '');
+            if (msg) messages.push(msg);
+        }
+        if (!messages.length) return;
+        const single = messages.map(m =>
+            '<span class="ticker-item">' + m + '</span><span class="ticker-sep"> ◆ </span>'
+        ).join('');
+        // כפול פי 2 לגלילה רציפה ללא קפיצה
+        const track = document.getElementById('ticker-track');
+        track.innerHTML = single + single;
+        const duration = Math.max(30, messages.length * 9);
+        track.style.animationDuration = duration + 's';
+    } catch(e) { console.error('Ticker load error', e); }
+}
+loadTicker();
+</script>
+
+<div class="container" id="main-content">
+    <div class="dept-grid">
+        <a href="hadpaami.html" class="dept-card"><img src="images/hadpaami.jpg"><h3>חד פעמי</h3></a>
+        <a href="baking.html" class="dept-card"><img src="images/bake1.jpeg"><h3>אפייה ומטבח</h3></a>
+        <a href="cleaning.html" class="dept-card"><img src="images/clean1.jpeg"><h3>מוצרי ניקיון</h3></a>
+        <a href="birthday.html" class="dept-card"><img src="images/bday1.jpeg"><h3>ימי הולדת</h3></a>
     </div>
 
-    <div class="tagline">
-        <p>הכל לבית, לאירוע ולמטבח — <strong>במחיר שמשתלם</strong> 🛍️</p>
-    </div>
-
-    <div class="ticker-wrap">
-        <div class="ticker-track" id="ticker-track">
-            <span class="ticker-item">טוען הודעות...</span>
+    <div class="reviews-section">
+        <h2>⭐ לקוחות ממליצים</h2>
+        <div class="reviews-grid" id="reviews-container">
+            <div style="color:#aaa;text-align:center;padding:20px;">טוען ביקורות...</div>
         </div>
     </div>
-
     <script>
-    async function loadTicker() {
+    async function loadReviews() {
         try {
-            const res  = await fetch('ticker.csv?t=' + Date.now());
+            const res = await fetch('reviews.csv?t=' + Date.now());
             const text = await res.text();
             const rows = text.split('\n').filter(r => r.trim());
-            const messages = [];
+            const container = document.getElementById('reviews-container');
+            container.innerHTML = '';
             for (let i = 1; i < rows.length; i++) {
-                const firstComma = rows[i].indexOf(',');
-                if (firstComma === -1) continue;
-                const msg = rows[i].substring(0, firstComma).trim().replace(/^"|"$/g, '');
-                if (msg) messages.push(msg);
+                // פיצול חכם — מתחשב בפסיקים בתוך טקסט
+                const cols = rows[i].match(/(".*?"|[^,]+)(?=,|$)/g);
+                if (!cols || cols.length < 5) continue;
+                const name  = cols[0].trim().replace(/^"|"$/g, '');
+                const text  = cols[1].trim().replace(/^"|"$/g, '');
+                const topic = cols[2].trim().replace(/^"|"$/g, '');
+                const color = cols[3].trim().replace(/^"|"$/g, '');
+                const time  = cols[4].trim().replace(/^"|"$/g, '');
+                const initial = name.charAt(0);
+                container.innerHTML += `
+                <div class="review-card">
+                    <span class="review-wa-badge">💬</span>
+                    <div class="review-header">
+                        <div class="review-avatar" style="background:${color};">${initial}</div>
+                        <div>
+                            <div class="review-name">${name}</div>
+                            <div class="review-time">${time}</div>
+                        </div>
+                    </div>
+                    <div class="review-stars">★★★★★</div>
+                    <div class="review-text">${text}</div>
+                    <span class="review-product-tag">${topic}</span>
+                </div>`;
             }
-            if (!messages.length) return;
-            const single = messages.map(m =>
-                '<span class="ticker-item">' + m + '</span><span class="ticker-sep"> ◆ </span>'
-            ).join('');
-            // כפול פי 2 לגלילה רציפה ללא קפיצה
-            const track = document.getElementById('ticker-track');
-            track.innerHTML = single + single;
-            const duration = Math.max(30, messages.length * 9);
-            track.style.animationDuration = duration + 's';
-        } catch(e) { console.error('Ticker load error', e); }
+        } catch(e) { console.error('Reviews load error', e); }
     }
-    loadTicker();
+    loadReviews();
     </script>
+</div>
 
-    <div class="container" id="main-content">
-        <div class="dept-grid">
-            <a href="hadpaami.html" class="dept-card"><img src="images/hadpaami.jpg"><h3>חד פעמי</h3></a>
-            <a href="baking.html"   class="dept-card"><img src="images/bake1.jpeg"><h3>אפייה ומטבח</h3></a>
-            <a href="cleaning.html" class="dept-card"><img src="images/clean1.jpeg"><h3>מוצרי ניקיון</h3></a>
-            <a href="birthday.html" class="dept-card"><img src="images/bday1.jpeg"><h3>ימי הולדת</h3></a>
+<footer>
+    <div class="footer-inner">
+        <div class="footer-col">
+            <h4>UP סטוק</h4>
+            <p>🛍️ קונים מה שרוצים במקום שאוהבים</p>
+            <p>📍המסגר 1,אור יהודה</p>
+            <p>📞 <a href="tel:0508810105">050-881-0105</a></p>
         </div>
-
-        <div class="reviews-section">
-            <h2>⭐ לקוחות ממליצים</h2>
-            <div class="reviews-grid" id="reviews-container">
-                <div style="color:#aaa;text-align:center;padding:20px;">טוען ביקורות...</div>
+        <div class="footer-col">
+            <h4>שעות פתיחה</h4>
+            <p>ראשון – חמישי: 07:30 – 20:00</p>
+            <p>שישי: 07:00 – 14:00</p>
+            <p>שבת: סגור</p>
+        </div>
+        <div class="footer-col">
+            <h4>עקבו אחרינו</h4>
+            <div class="social-links">
+                <a href="#" class="social-btn social-tiktok" title="TikTok">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.18 8.18 0 004.78 1.52V6.75a4.85 4.85 0 01-1.01-.06z"/></svg>
+                </a>
+                <a href="#" class="social-btn social-facebook" title="Facebook">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                </a>
+                <a href="https://wa.me/972549397753" class="social-btn social-whatsapp" title="WhatsApp" target="_blank">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                </a>
             </div>
         </div>
-
-        <script>
-        async function loadReviews() {
-            try {
-                const res  = await fetch('reviews.csv?t=' + Date.now());
-                const text = await res.text();
-                const rows = text.split('\n').filter(r => r.trim());
-                const container = document.getElementById('reviews-container');
-                container.innerHTML = '';
-                for (let i = 1; i < rows.length; i++) {
-                    // פיצול חכם — מתחשב בפסיקים בתוך טקסט
-                    const cols = rows[i].match(/(".*?"|[^,]+)(?=,|$)/g);
-                    if (!cols || cols.length < 5) continue;
-                    const name  = cols[0].trim().replace(/^"|"$/g, '');
-                    const text  = cols[1].trim().replace(/^"|"$/g, '');
-                    const topic = cols[2].trim().replace(/^"|"$/g, '');
-                    const color = cols[3].trim().replace(/^"|"$/g, '');
-                    const time  = cols[4].trim().replace(/^"|"$/g, '');
-                    const initial = name.charAt(0);
-                    container.innerHTML += `
-                        <div class="review-card">
-                            <span class="review-wa-badge">💬</span>
-                            <div class="review-header">
-                                <div class="review-avatar" style="background:${color};">${initial}</div>
-                                <div>
-                                    <div class="review-name">${name}</div>
-                                    <div class="review-time">${time}</div>
-                                </div>
-                            </div>
-                            <div class="review-stars">★★★★★</div>
-                            <div class="review-text">${text}</div>
-                            <span class="review-product-tag">${topic}</span>
-                        </div>`;
-                }
-            } catch(e) { console.error('Reviews load error', e); }
-        }
-        loadReviews();
-        </script>
     </div>
+    <div class="footer-bottom">© 2025 UP סטוק — כל הזכויות שמורות</div>
+</footer>
 
-
-    <footer>
-        <div class="footer-inner">
-            <div class="footer-col">
-                <h4>UP סטוק</h4>
-                <p>🛍️ קונים מה שרוצים במקום שאוהבים</p>
-                <p>📍המסגר 1,אור יהודה</p>
-                <p>📞 <a href="tel:0508810105">050-881-0105</a></p>
-            </div>
-            <div class="footer-col">
-                <h4>שעות פתיחה</h4>
-                <p>ראשון – חמישי: 07:30 – 20:00</p>
-                <p>שישי: 07:00 – 14:00</p>
-                <p>שבת: סגור</p>
-            </div>
-            <div class="footer-col">
-                <h4>עקבו אחרינו</h4>
-                <div class="social-links">
-                    <a href="#" class="social-btn social-tiktok" title="TikTok">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.18 8.18 0 004.78 1.52V6.75a4.85 4.85 0 01-1.01-.06z"/></svg>
-                    </a>
-                    <a href="#" class="social-btn social-facebook" title="Facebook">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
-                    </a>
-                    <a href="https://wa.me/972549397753" class="social-btn social-whatsapp" title="WhatsApp" target="_blank">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-                    </a>
-                </div>
-            </div>
-        </div>
-        <div class="footer-bottom">© 2025 UP סטוק — כל הזכויות שמורות</div>
-    </footer>
 </body>
 </html>
