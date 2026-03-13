@@ -32,6 +32,15 @@
             <img src="images/food appeal3.jpeg" alt="Food Appeal" onclick="openImg(this.src)" onerror="this.style.display='none'">
             <img src="images/food appeal4.jpeg" alt="Food Appeal" onclick="openImg(this.src)" onerror="this.style.display='none'">
         </div>
+
+        <div id="productSliderSection" class="product-slider-section">
+            <h2 class="section-title">🛍️ מוצרים נבחרים</h2>
+            <div class="product-slider-wrap">
+                <button class="slider-arrow slider-arrow-next" onclick="slideProducts('next')">❮</button>
+                <div class="product-slider" id="productSlider" data-category="Food Appeal"></div>
+                <button class="slider-arrow slider-arrow-prev" onclick="slideProducts('prev')">❯</button>
+            </div>
+        </div>
     </div>
 
 </body>
