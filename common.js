@@ -248,7 +248,7 @@ function injectCommonCSS() {
         .slider-arrow:hover { background: var(--primary); color: white; }
         .slider-arrow-next { right: 0; }
         .slider-arrow-prev { left: 0; }
-        @media (max-width: 600px) { .product-slider-wrap { padding: 0 34px; } .product-slider .product-card { min-width: 140px; max-width: 140px; } }
+        @media (max-width: 600px) { .product-slider-wrap { padding: 0 10px; } .slider-arrow { display: none; } .product-slider .product-card { min-width: 120px; max-width: 120px; margin-right: 10px; padding: 10px; } }
     `;
     document.head.appendChild(style);
 }
