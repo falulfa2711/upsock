@@ -33,6 +33,15 @@
             <img src="images/clean03.jpeg" alt="ניקיון" onclick="openImg(this.src)" onerror="this.style.display='none'">
             <img src="images/clean04.jpeg" alt="ניקיון" onclick="openImg(this.src)" onerror="this.style.display='none'">
         </div>
+
+        <div id="productSliderSection" class="product-slider-section">
+            <h2 class="section-title">🛍️ מוצרים נבחרים</h2>
+            <div class="product-slider-wrap">
+                <button class="slider-arrow slider-arrow-next" onclick="slideProducts('next')">❮</button>
+                <div class="product-slider" id="productSlider" data-category="מוצרי נקיון וטיפוח"></div>
+                <button class="slider-arrow slider-arrow-prev" onclick="slideProducts('prev')">❯</button>
+            </div>
+        </div>
     </div>
 
 </body>
