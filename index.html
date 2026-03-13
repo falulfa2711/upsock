@@ -93,6 +93,50 @@
         .social-facebook { background: #1877f2; color: white; }
         .social-whatsapp { background: #25d366; color: white; }
         .footer-bottom { text-align: center; margin-top: 30px; padding-top: 16px; border-top: 1px solid #333; font-size: 0.8em; color: #666; }
+
+        /* באנר מדי צופים */
+        .scouts-banner {
+            display: flex;
+            align-items: center;
+            background: linear-gradient(135deg, #4a7c59, #3d6b4e);
+            border-radius: 18px;
+            overflow: hidden;
+            margin: 35px 0;
+            box-shadow: 0 6px 20px rgba(74,124,89,0.3);
+            text-decoration: none;
+            color: white;
+            transition: transform 0.25s, box-shadow 0.25s;
+        }
+        .scouts-banner:hover { transform: translateY(-3px); box-shadow: 0 10px 30px rgba(74,124,89,0.4); }
+        .scouts-banner img {
+            width: 45%;
+            max-height: 220px;
+            object-fit: cover;
+        }
+        .scouts-banner-text {
+            flex: 1;
+            padding: 25px 30px;
+            text-align: center;
+        }
+        .scouts-banner-text h2 { margin: 0 0 8px; font-size: 1.6em; }
+        .scouts-banner-text p { margin: 0 0 14px; opacity: 0.9; font-size: 1em; }
+        .scouts-badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            border: 2px solid white;
+            padding: 8px 22px;
+            border-radius: 25px;
+            font-weight: 700;
+            font-size: 0.95em;
+            transition: background 0.2s;
+        }
+        .scouts-banner:hover .scouts-badge { background: rgba(255,255,255,0.35); }
+        @media (max-width: 600px) {
+            .scouts-banner { flex-direction: column; }
+            .scouts-banner img { width: 100%; max-height: 180px; }
+            .scouts-banner-text { padding: 18px; }
+            .scouts-banner-text h2 { font-size: 1.3em; }
+        }
     </style>
     <script src="common.js" defer></script>
 </head>
@@ -154,6 +198,16 @@ loadTicker();
         <a href="birthday.html" class="dept-card"><img src="images/bday1.jpeg"><h3>ימי הולדת</h3></a>
         <a href="foodappeal.html" class="dept-card"><img src="images/food appeal.jpeg"><h3>Food Appeal</h3></a>
     </div>
+
+    <!-- באנר מדי צופים -->
+    <a href="https://wa.me/972508810105?text=%D7%94%D7%99%D7%99%2C%20%D7%90%D7%A0%D7%99%20%D7%9E%D7%AA%D7%A2%D7%A0%D7%99%D7%99%D7%9F%20%D7%91%D7%9E%D7%93%D7%99%20%D7%A6%D7%95%D7%E4%D7%99%D7%9D" class="scouts-banner" target="_blank">
+        <img src="images/scouts.webp" alt="מדי צופים">
+        <div class="scouts-banner-text">
+            <h2>מדי צופים</h2>
+            <p>מדים, חגורות ואביזרים לכל תנועות הנוער</p>
+            <span class="scouts-badge">לפרטים ולהזמנה →</span>
+        </div>
+    </a>
 
     <div class="reviews-section">
         <h2>⭐ לקוחות ממליצים</h2>
